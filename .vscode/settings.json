@@ -26,5 +26,4 @@
     },
   ],
   "java.test.defaultConfig": "WPIlibUnitTests",
-  "java.settings.url": ".vscode/java-formatter-settings.prefs"
 }
