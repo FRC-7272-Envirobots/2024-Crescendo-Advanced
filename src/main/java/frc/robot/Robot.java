@@ -4,10 +4,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -24,11 +21,11 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
   // motors
-  private static final String canBusName = "";
-  private final TalonFX m_fx = new TalonFX(5, canBusName);
+  // private static final String canBusName = "";
+  // private final TalonFX m_fx = new TalonFX(5, canBusName);
 
   // controllers
-  private final Joystick m_joystick = new Joystick(0);
+  // private final Joystick m_joystick = new Joystick(0);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -109,14 +106,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    boolean buttonPressed = m_joystick.getRawButton(1);
-    if (buttonPressed) {
-      /* Use voltage velocity */
-      m_fx.set(.1);
-    } else {
-      /* Disable the motor instead */
-      m_fx.set(0);
-    }
   }
 
   @Override

@@ -14,10 +14,11 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.subsystems.AdvancedArmSubsystem;
+import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -34,6 +35,8 @@ import java.util.List;
 public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+    private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
+    private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -66,10 +69,35 @@ public class RobotContainer {
      * {@link XboxController}), and then passing it to a {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-        new JoystickButton(m_driverController, Button.kR1.value)
-                .whileTrue(new RunCommand(
-                        () -> m_robotDrive.setX(),
-                        m_robotDrive));
+       
+        // new JoystickButton(m_driverController, XboxController.Button.kRB.value)
+        //         .whileTrue(new RunCommand(
+        //                 () -> m_robotDrive.setX(),
+        //                 m_robotDrive));
+
+        // A button = Run Intake
+        new JoystickButton(m_driverController, XboxController.Button.kA.value)
+            .whileTrue(m_intake.runIntakeUntilCaptured().withTimeout(5));
+
+        // X button = Run Shooter
+        new JoystickButton(m_driverController, XboxController.Button.kX.value)
+            .whileTrue(m_intake.runShooter().withTimeout(5));
+
+        // Y button = Arm in COAST mode - probably not what you want
+         new JoystickButton(m_driverController, XboxController.Button.kY.value)
+            .onTrue(m_arm.setCoastModeCommand());
+
+         // B button = Arm in BRAKE mode - this is the default
+         new JoystickButton(m_driverController, XboxController.Button.kB.value)
+            .onTrue(m_arm.setBrakeModeCommand());
+
+        // R1 / RB button - Arm moves up
+        new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
+            .whileTrue(m_arm.moveArmUpCommand());
+
+        // L1 / LB arrow key - Arm moves down
+        new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
+            .whileTrue(m_arm.moveArmDownCommand());
     }
 
     /**
