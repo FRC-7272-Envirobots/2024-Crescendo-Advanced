@@ -20,6 +20,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.LightSensor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -35,6 +36,7 @@ import java.util.List;
 public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+    private final LightSensor m_lightSensor = new LightSensor();
     private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
     private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
 
@@ -77,7 +79,7 @@ public class RobotContainer {
 
         // A button = Run Intake
         new JoystickButton(m_driverController, XboxController.Button.kA.value)
-            .whileTrue(m_intake.runIntakeUntilCaptured().withTimeout(5));
+            .whileTrue(m_intake.runIntakeUntilCaptured().until(m_lightSensor::isKNoteVisible));
 
         // X button = Run Shooter
         new JoystickButton(m_driverController, XboxController.Button.kX.value)
@@ -98,6 +100,7 @@ public class RobotContainer {
         // L1 / LB arrow key - Arm moves down
         new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
             .whileTrue(m_arm.moveArmDownCommand());
+
     }
 
     /**
