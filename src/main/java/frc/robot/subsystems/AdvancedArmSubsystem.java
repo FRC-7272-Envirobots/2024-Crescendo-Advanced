@@ -11,8 +11,8 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     private final TalonFX left_motor = new TalonFX(12, "");
     private final TalonFX right_motor = new TalonFX(11, "");
 
-    private static double move_up_pct_power = 0.3;
-    private static double move_down_pct_power = -0.3;
+    private static double move_up_pct_power = 0.4;
+    private static double move_down_pct_power = -0.4;
     private static double hold_position_pct_power = 0;
 
     public AdvancedArmSubsystem() {
