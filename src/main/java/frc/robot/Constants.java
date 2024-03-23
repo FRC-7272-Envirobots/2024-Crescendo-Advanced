@@ -50,15 +50,15 @@ public final class Constants {
     public static final double kBackRightChassisAngularOffset = Math.PI / 2;
 
     // SPARK MAX CAN IDs
-    public static final int kFrontLeftDrivingCanId = 11;
-    public static final int kRearLeftDrivingCanId = 13;
-    public static final int kFrontRightDrivingCanId = 15;
-    public static final int kRearRightDrivingCanId = 17;
+    public static final int kFrontLeftDrivingCanId = 26;
+    public static final int kRearLeftDrivingCanId = 20;
+    public static final int kFrontRightDrivingCanId = 24;
+    public static final int kRearRightDrivingCanId = 27;
 
-    public static final int kFrontLeftTurningCanId = 10;
-    public static final int kRearLeftTurningCanId = 12;
-    public static final int kFrontRightTurningCanId = 14;
-    public static final int kRearRightTurningCanId = 16;
+    public static final int kFrontLeftTurningCanId = 23;
+    public static final int kRearLeftTurningCanId = 21;
+    public static final int kFrontRightTurningCanId = 22;
+    public static final int kRearRightTurningCanId = 25;
 
     public static final boolean kGyroReversed = false;
   }
@@ -95,9 +95,9 @@ public final class Constants {
     public static final double kTurningEncoderPositionPIDMinInput = 0; // radians
     public static final double kTurningEncoderPositionPIDMaxInput = kTurningEncoderPositionFactor; // radians
 
-    public static final double kDrivingP = 0.04;
+    public static final double kDrivingP = 0.1;
     public static final double kDrivingI = 0;
-    public static final double kDrivingD = 0;
+    public static final double kDrivingD = 0.1;
     public static final double kDrivingFF = 1 / kDriveWheelFreeSpeedRps;
     public static final double kDrivingMinOutput = -1;
     public static final double kDrivingMaxOutput = 1;

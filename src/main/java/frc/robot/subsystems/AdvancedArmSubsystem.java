@@ -8,11 +8,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AdvancedArmSubsystem extends SubsystemBase {
-    private final TalonFX left_motor = new TalonFX(5, "");
-    private final TalonFX right_motor = new TalonFX(7, "");
+    private final TalonFX left_motor = new TalonFX(12, "");
+    private final TalonFX right_motor = new TalonFX(11, "");
 
     private static double move_up_pct_power = 0.3;
-    private static double move_down_pct_power = -0.1;
+    private static double move_down_pct_power = -0.3;
     private static double hold_position_pct_power = 0;
 
     public AdvancedArmSubsystem() {
@@ -21,6 +21,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         right_motor.setInverted(true);
 
         left_motor.setNeutralMode(NeutralModeValue.Brake);
+        right_motor.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public Command moveArmUpCommand() {
