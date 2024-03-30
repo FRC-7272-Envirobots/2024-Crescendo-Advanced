@@ -139,6 +139,12 @@ public class RobotContainer {
 
         new JoystickButton(m_arcadeBox, 2)
                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+        new JoystickButton(m_arcadeBox, 3)
+                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kForward));
+
+        new JoystickButton(m_arcadeBox, 4)
+                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     /**
