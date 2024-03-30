@@ -52,7 +52,7 @@ public class RobotContainer {
     public final NoteIntakeSensor m_lightSensor = new NoteIntakeSensor();
     private final AdvancedShooterSubsystem m_shooter = new AdvancedShooterSubsystem();
     private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
-    private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem(left_arm_motor, right_arm_motor);
+    private final AdvancedArmSubsystem m_arm;
     private final Lightstrip lightstrip = new Lightstrip(500);
 
     // The driver's controller
@@ -65,6 +65,7 @@ public class RobotContainer {
     public RobotContainer(TalonFX left_arm_motor, TalonFX right_arm_motor) {
         this.left_arm_motor = left_arm_motor;
         this.right_arm_motor = right_arm_motor;
+        this.m_arm = new AdvancedArmSubsystem(left_arm_motor, right_arm_motor);
 
         // Configure the button bindings
         configureButtonBindings();
@@ -133,10 +134,10 @@ public class RobotContainer {
         // XboxController.Axis.kRightTrigger.value)
         // .whileTrue(new ArmTo90Deg(m_arm));
 
-        new JoystickButton(m_arcadeBox, 0)
+        new JoystickButton(m_arcadeBox, 1)
                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
 
-        new JoystickButton(m_arcadeBox, 1)
+        new JoystickButton(m_arcadeBox, 2)
                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     }
 
