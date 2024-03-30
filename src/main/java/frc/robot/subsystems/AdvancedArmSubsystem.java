@@ -16,9 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AdvancedArmSubsystem extends SubsystemBase {
-    private final TalonFX left_motor = new TalonFX(12);
-    private final TalonFX right_motor = new TalonFX(11);
-
     private static double move_up_pct_power = 0.4;
     private static double move_down_pct_power = -0.4;
     private static double hold_position_pct_power = 0;
@@ -28,21 +25,19 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     PositionVoltage positionControl;
     public AdvancedArmSubsystem() {
         super();
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = 1;
-        config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-        left_motor.setInverted(false);
-        right_motor.setInverted(true);
+        // TalonFXConfiguration config = new TalonFXConfiguration();
+        // config.Slot0.kP = 1;
+        // config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+        // left_motor.setInverted(false);
+        // right_motor.setInverted(true);
 
-        Follower follower = new Follower(left_motor.getDeviceID(), true);
-        right_motor.setControl(follower);
-        right_motor.getConfigurator().apply(config);
-        left_motor.setNeutralMode(NeutralModeValue.Brake);
-        right_motor.setNeutralMode(NeutralModeValue.Brake);
+        // Follower follower = new Follower(left_motor.getDeviceID(), true);
+        // right_motor.setControl(follower);
+        // right_motor.getConfigurator().apply(config);
+        // left_motor.setNeutralMode(NeutralModeValue.Brake);
+        // right_motor.setNeutralMode(NeutralModeValue.Brake);
 
-        //TODO: Change this to 8. It causes conflicts until the Robot.java encoder is removed.
-        armEncoder = new DutyCycleEncoder(7);
-
+        armEncoder = new DutyCycleEncoder(8);
         positionControl = new PositionVoltage(0.0);
     }
 
@@ -50,7 +45,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         return Commands.startEnd(
                 () -> {
                     left_motor.set(move_up_pct_power);
-                    right_motor.set(move_up_pct_power);
+                    //right_motor.set(move_up_pct_power);
                 },
                 () -> {
                     left_motor.set(hold_position_pct_power);
@@ -98,6 +93,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     } 
 
     public void setPosition(double position) {
-        left_motor.setControl(positionControl.withPosition(5.0));
+        left_motor.setControl(positionControl.withPosition(position));
     }
 }
