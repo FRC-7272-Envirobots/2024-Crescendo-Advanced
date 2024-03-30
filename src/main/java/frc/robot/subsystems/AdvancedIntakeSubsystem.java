@@ -15,7 +15,7 @@ public class AdvancedIntakeSubsystem extends SubsystemBase {
         intake_motor.setInverted(true);
     }
 
-    public Command runIntakeUntilCaptured() {
+    public Command runIntake() {
         return Commands.startEnd(
             ()-> intake_motor.set(.50),
             () -> intake_motor.set(0),

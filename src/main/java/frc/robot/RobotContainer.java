@@ -14,6 +14,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
@@ -21,8 +22,10 @@ import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.LightSensor;
+import frc.robot.subsystems.NoteIntakeSensor;
+import frc.robot.subsystems.Lightstrip;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -37,10 +40,12 @@ import java.util.List;
 public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-    private final LightSensor m_lightSensor = new LightSensor();
+    public final NoteIntakeSensor m_lightSensor = new NoteIntakeSensor();
     private final AdvancedShooterSubsystem m_shooter = new AdvancedShooterSubsystem();
     private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
     private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
+    private final Lightstrip lightstrip = new Lightstrip(500);
+    
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -81,19 +86,26 @@ public class RobotContainer {
 
         // A button = Run Intake
         new JoystickButton(m_driverController, XboxController.Button.kA.value)
-            .whileTrue(m_intake.runIntakeUntilCaptured().until(m_lightSensor::isKNoteVisible));
+            .whileTrue(m_intake.runIntake().until(m_lightSensor::isNoteCaptured));
 
         // X button = Run Shooter
         new JoystickButton(m_driverController, XboxController.Button.kX.value)
-            .whileTrue(m_shooter.runShooter().withTimeout(5));
+            .whileTrue(Commands.parallel(
+                m_shooter.runShooter(),
+                Commands.sequence(
+                    Commands.waitSeconds(.2),
+                    m_intake.runIntake()
+                )
+            )
+        );
 
-        // Y button = Arm in COAST mode - probably not what you want
-         new JoystickButton(m_driverController, XboxController.Button.kY.value)
-            .onTrue(m_arm.setCoastModeCommand());
+        // // Y button = Arm in COAST mode - probably not what you want
+        //  new JoystickButton(m_driverController, XboxController.Button.kY.value)
+        //     .onTrue(m_arm.setCoastModeCommand());
 
-         // B button = Arm in BRAKE mode - this is the default
-         new JoystickButton(m_driverController, XboxController.Button.kB.value)
-            .onTrue(m_arm.setBrakeModeCommand());
+        //  // B button = Arm in BRAKE mode - this is the default
+        //  new JoystickButton(m_driverController, XboxController.Button.kB.value)
+        //     .onTrue(m_arm.setBrakeModeCommand());
 
         // R1 / RB button - Arm moves up
         new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
@@ -103,7 +115,11 @@ public class RobotContainer {
         new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
             .whileTrue(m_arm.moveArmDownCommand());
 
-        //TODO Test this CAREFULLY. Need to measure encoder values at 90deg first        
+         // B button = Arm in BRAKE mode - this is the default
+         new JoystickButton(m_driverController, XboxController.Button.kB.value)
+            .onTrue(Commands.runOnce(()-> lightstrip.setColor(Color.kGreen)));
+
+        //TODO Test this CAREFULLY. Need to measure encoder values at 90deg first
         // new JoystickButton(m_driverController, XboxController.Axis.kRightTrigger.value)
         //     .whileTrue(new ArmTo90Deg(m_arm));
     }
