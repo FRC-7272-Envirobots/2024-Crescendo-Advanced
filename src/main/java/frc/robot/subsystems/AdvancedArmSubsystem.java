@@ -1,13 +1,7 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.compound.Diff_PositionVoltage_Velocity;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.Angle;
@@ -40,18 +34,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
 
     public AdvancedArmSubsystem(TalonFX left_motor, TalonFX right_motor) {
         super();
-        // TalonFXConfiguration config = new TalonFXConfiguration();
-        // config.Slot0.kP = 1;
-        // config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-        // left_motor.setInverted(false);
-        // right_motor.setInverted(true);
-
-        // Follower follower = new Follower(left_motor.getDeviceID(), true);
-        // right_motor.setControl(follower);
-        // right_motor.getConfigurator().apply(config);
-        // left_motor.setNeutralMode(NeutralModeValue.Brake);
-        // right_motor.setNeutralMode(NeutralModeValue.Brake);
-
         this.left_motor = left_motor;
         this.right_motor = right_motor;
         armEncoder = new DutyCycleEncoder(8);
@@ -62,11 +44,9 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         return Commands.startEnd(
                 () -> {
                     left_motor.set(move_up_pct_power);
-                    // right_motor.set(move_up_pct_power);
                 },
                 () -> {
                     left_motor.set(hold_position_pct_power);
-                    // right_motor.set(hold_position_pct_power);
                 }, this);
     }
 
@@ -74,25 +54,21 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         return Commands.startEnd(
                 () -> {
                     left_motor.set(move_down_pct_power);
-                    // right_motor.set(move_down_pct_power);
                 },
                 () -> {
                     left_motor.set(hold_position_pct_power);
-                    // right_motor.set(hold_position_pct_power);
                 }, this);
     }
 
     public Command setBrakeModeCommand() {
         return this.runOnce(() -> {
             left_motor.setNeutralMode(NeutralModeValue.Brake);
-            // right_motor.setNeutralMode(NeutralModeValue.Brake);
         });
     }
 
     public Command setCoastModeCommand() {
         return this.runOnce(() -> {
             left_motor.setNeutralMode(NeutralModeValue.Coast);
-            // right_motor.setNeutralMode(NeutralModeValue.Coast);
         });
     }
 
@@ -106,7 +82,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
 
     public void moveArm(double pct_power) {
         left_motor.set(pct_power);
-        // right_motor.set(pct_power);
     }
 
     public void setPosition(double position) {
