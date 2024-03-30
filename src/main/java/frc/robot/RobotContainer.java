@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -71,6 +73,12 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
+
+        // Set up camera server
+        UsbCamera frontCamera = CameraServer.startAutomaticCapture("front", 0);
+        frontCamera.setResolution(640, 480);
+        UsbCamera rearCamera = CameraServer.startAutomaticCapture("rear", 1);
+        rearCamera.setResolution(640, 480);
 
         // Configure default commands
         m_robotDrive.setDefaultCommand(
