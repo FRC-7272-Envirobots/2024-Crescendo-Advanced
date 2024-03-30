@@ -5,6 +5,7 @@
 package frc.robot;
 
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -42,19 +43,27 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     //Arm motion logic
     config = new TalonFXConfiguration();
-    config.Slot0.kP = 1;
-    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-    // TODO: See if needed?
-    // left_motor.setInverted(false);
-    left_arm_motor.getConfigurator().apply(config);
-    left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
+    config.Slot0.kP = 1; //7.3697;
+    //config.Slot0.kI = ;
+    config.Slot0.kD = 0.056523;
+    config.Slot0.kS = 0.20933;
+    config.Slot0.kV = 0.10312;
+    config.Slot0.kA = 0.00085311;
 
-    // TODO: See if needed? it shouldn't because of 2nd arg in follower init
-    // right_motor.setInverted(true);
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    config.Slot0.kG = 0.15387;
+
+    StatusCode status = StatusCode.StatusCodeNotInitialized;
+    for(int i = 0; i < 5; ++i) {
+      status = left_arm_motor.getConfigurator().apply(config);
+      if (status.isOK()) break;
+    }
+    if (!status.isOK()) {
+      System.out.println("Could not configure device. Error: " + status.toString());
+    }
+    //left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
     right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
     right_arm_motor.setControl(right_arm_follower);
-    // Also not needed?
-    //right_motor.setNeutralMode(NeutralModeValue.Brake);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.

@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.ArmToPosition;
+import frc.robot.commands.ArmToPositionControl;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
@@ -113,7 +115,6 @@ public class RobotContainer {
                                 m_intake.runIntake()))
                         .finallyDo(() -> lightstrip.setShootCompletedColor()));
 
-
         // // Y button = Arm in COAST mode - probably not what you want
         // new JoystickButton(m_driverController, XboxController.Button.kY.value)
         // .onTrue(m_arm.setCoastModeCommand());
@@ -146,6 +147,18 @@ public class RobotContainer {
 
         new JoystickButton(m_arcadeBox, 4)
                 .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+        // Shooting angle
+        new JoystickButton(m_arcadeBox, 5)
+                .whileTrue(new ArmToPositionControl(m_arm, 20, true));
+        new JoystickButton(m_arcadeBox,6)
+                .whileTrue(new ArmToPosition(m_arm, 20, true));
+
+        // Resting angle
+        new JoystickButton(m_arcadeBox, 3)
+                .whileTrue(new ArmToPositionControl(m_arm, 82, true));
+        new JoystickButton(m_arcadeBox,4)
+                .whileTrue(new ArmToPosition(m_arm, 82, true));
     }
 
     /**
