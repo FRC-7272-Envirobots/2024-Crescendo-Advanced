@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants.AutoConstants;
@@ -29,7 +30,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
 import java.util.List;
+
+import com.ctre.phoenix6.hardware.TalonFX;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -38,22 +43,29 @@ import java.util.List;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+    // Robot.java components
+    private TalonFX left_arm_motor;
+    private TalonFX right_arm_motor;
+
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
     public final NoteIntakeSensor m_lightSensor = new NoteIntakeSensor();
     private final AdvancedShooterSubsystem m_shooter = new AdvancedShooterSubsystem();
     private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
-    private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
+    private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem(left_arm_motor, right_arm_motor);
     private final Lightstrip lightstrip = new Lightstrip(500);
-    
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+    Joystick m_arcadeBox = new Joystick(1);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
-    public RobotContainer() {
+    public RobotContainer(TalonFX left_arm_motor, TalonFX right_arm_motor) {
+        this.left_arm_motor = left_arm_motor;
+        this.right_arm_motor = right_arm_motor;
+
         // Configure the button bindings
         configureButtonBindings();
 
@@ -78,50 +90,54 @@ public class RobotContainer {
      * {@link XboxController}), and then passing it to a {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-       
+
         // new JoystickButton(m_driverController, XboxController.Button.kRB.value)
-        //         .whileTrue(new RunCommand(
-        //                 () -> m_robotDrive.setX(),
-        //                 m_robotDrive));
+        // .whileTrue(new RunCommand(
+        // () -> m_robotDrive.setX(),
+        // m_robotDrive));
 
         // A button = Run Intake
         new JoystickButton(m_driverController, XboxController.Button.kA.value)
-            .whileTrue(m_intake.runIntake().until(m_lightSensor::isNoteCaptured));
+                .whileTrue(m_intake.runIntake().until(m_lightSensor::isNoteCaptured));
 
         // X button = Run Shooter
         new JoystickButton(m_driverController, XboxController.Button.kX.value)
-            .whileTrue(Commands.parallel(
-                m_shooter.runShooter(),
-                Commands.sequence(
-                    Commands.waitSeconds(.2),
-                    m_intake.runIntake()
-                )
-            )
-        );
+                .whileTrue(Commands.parallel(
+                        m_shooter.runShooter(),
+                        Commands.sequence(
+                                Commands.waitSeconds(.2),
+                                m_intake.runIntake())));
 
         // // Y button = Arm in COAST mode - probably not what you want
-        //  new JoystickButton(m_driverController, XboxController.Button.kY.value)
-        //     .onTrue(m_arm.setCoastModeCommand());
+        // new JoystickButton(m_driverController, XboxController.Button.kY.value)
+        // .onTrue(m_arm.setCoastModeCommand());
 
-        //  // B button = Arm in BRAKE mode - this is the default
-        //  new JoystickButton(m_driverController, XboxController.Button.kB.value)
-        //     .onTrue(m_arm.setBrakeModeCommand());
+        // // B button = Arm in BRAKE mode - this is the default
+        // new JoystickButton(m_driverController, XboxController.Button.kB.value)
+        // .onTrue(m_arm.setBrakeModeCommand());
 
         // R1 / RB button - Arm moves up
         new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
-            .whileTrue(m_arm.moveArmUpCommand());
+                .whileTrue(m_arm.moveArmUpCommand());
 
         // L1 / LB arrow key - Arm moves down
         new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
-            .whileTrue(m_arm.moveArmDownCommand());
+                .whileTrue(m_arm.moveArmDownCommand());
 
-         // B button = Arm in BRAKE mode - this is the default
-         new JoystickButton(m_driverController, XboxController.Button.kB.value)
-            .onTrue(Commands.runOnce(()-> lightstrip.setColor(Color.kGreen)));
+        // B button = Arm in BRAKE mode - this is the default
+        new JoystickButton(m_driverController, XboxController.Button.kB.value)
+                .onTrue(Commands.runOnce(() -> lightstrip.setColor(Color.kGreen)));
 
-        //TODO Test this CAREFULLY. Need to measure encoder values at 90deg first
-        // new JoystickButton(m_driverController, XboxController.Axis.kRightTrigger.value)
-        //     .whileTrue(new ArmTo90Deg(m_arm));
+        // TODO Test this CAREFULLY. Need to measure encoder values at 90deg first
+        // new JoystickButton(m_driverController,
+        // XboxController.Axis.kRightTrigger.value)
+        // .whileTrue(new ArmTo90Deg(m_arm));
+
+        new JoystickButton(m_arcadeBox, 0)
+                .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+
+        new JoystickButton(m_arcadeBox, 1)
+                .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     }
 
     /**

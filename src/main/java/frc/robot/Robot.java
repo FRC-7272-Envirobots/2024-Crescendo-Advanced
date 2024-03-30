@@ -5,6 +5,12 @@
 package frc.robot;
 
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,13 +37,6 @@ public class Robot extends TimedRobot {
   TalonFXConfiguration config;
   Follower right_arm_follower;
 
-  // motors
-  // private static final String canBusName = "";
-  // private final TalonFX m_fx = new TalonFX(5, canBusName);
-
-  // controllers
-  // private final Joystick m_joystick = new Joystick(0);
-
   /**
    * This function is run when the robot is first started up and should be used
    * for any initialization code.
@@ -50,13 +49,13 @@ public class Robot extends TimedRobot {
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     // TODO: See if needed?
     // left_motor.setInverted(false);
-    left_motor.getConfigurator().apply(config);
-    left_motor.setNeutralMode(NeutralModeValue.Brake);
+    left_arm_motor.getConfigurator().apply(config);
+    left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
 
     // TODO: See if needed? it shouldn't because of 2nd arg in follower init
     // right_motor.setInverted(true);
-    follower = new Follower(left_motor.getDeviceID(), true);
-    right_motor.setControl(follower);
+    right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
+    right_arm_motor.setControl(right_arm_follower);
     // Also not needed?
     //right_motor.setNeutralMode(NeutralModeValue.Brake);
 
@@ -64,7 +63,7 @@ public class Robot extends TimedRobot {
     // and put our autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer(
       left_arm_motor,
-      right_arm_motor,
+      right_arm_motor
     );
     // armEncoder = new DutyCycleEncoder(8);
     //     armEncoder.reset();
