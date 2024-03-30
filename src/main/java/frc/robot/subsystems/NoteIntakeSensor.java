@@ -49,7 +49,7 @@ public class NoteIntakeSensor extends SubsystemBase {
   public void periodic() {
     boolean measureColor = SmartDashboard.getBoolean("measureColor", false);
 
-    if (false) {
+    if (measureColor) {
       int proximity = m_colorSensor.getProximity();
       Color detectedColor = m_colorSensor.getColor();
       ColorMatchResult match = m_colorMatcher.matchColor(detectedColor);

@@ -53,7 +53,7 @@ public class RobotContainer {
     private final AdvancedShooterSubsystem m_shooter = new AdvancedShooterSubsystem();
     private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
     private final AdvancedArmSubsystem m_arm;
-    private final Lightstrip lightstrip = new Lightstrip(m_lightSensor);
+    private final Lightstrip lightstrip = new Lightstrip();
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);

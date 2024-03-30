@@ -18,15 +18,9 @@ public class Lightstrip extends SubsystemBase{
   private final AddressableLED m_led;
   private final AddressableLEDBuffer m_ledBuffer;
 
-  private final NoteIntakeSensor noteIntakeSensor; 
-
-  private boolean lastSensorValue;
-
   /** Creates a new Launcher. */
-  public Lightstrip(NoteIntakeSensor noteIntakeSensor) {
+  public Lightstrip() {
     super();
-    this.noteIntakeSensor = noteIntakeSensor;
-
     this.m_led = new AddressableLED(PWM_PORT);
 
     // Reuse buffer
@@ -57,9 +51,4 @@ public class Lightstrip extends SubsystemBase{
    }
    m_led.setData(m_ledBuffer);
   }
-
-  // @Override
-  // public void periodic() {
-  //   // if 
-  // }
 }
