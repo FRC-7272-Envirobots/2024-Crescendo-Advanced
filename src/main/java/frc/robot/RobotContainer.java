@@ -44,8 +44,7 @@ public class RobotContainer {
     private final AdvancedShooterSubsystem m_shooter = new AdvancedShooterSubsystem();
     private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
     private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
-    private final Lightstrip lightstrip = new Lightstrip(500);
-    
+    private final Lightstrip lightstrip = new Lightstrip(m_lightSensor);
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -86,18 +85,19 @@ public class RobotContainer {
 
         // A button = Run Intake
         new JoystickButton(m_driverController, XboxController.Button.kA.value)
-            .whileTrue(m_intake.runIntake().until(m_lightSensor::isNoteCaptured));
+                .whileTrue(
+                        m_intake.runIntake()
+                                .until(m_lightSensor::isNoteCaptured)
+                                .andThen(lightstrip.setIntakeSuccessColor()));
 
         // X button = Run Shooter
         new JoystickButton(m_driverController, XboxController.Button.kX.value)
-            .whileTrue(Commands.parallel(
-                m_shooter.runShooter(),
-                Commands.sequence(
-                    Commands.waitSeconds(.2),
-                    m_intake.runIntake()
-                )
-            )
-        );
+                .whileTrue(Commands.parallel(
+                        m_shooter.runShooter(),
+                        Commands.sequence(
+                                Commands.waitSeconds(.2),
+                                m_intake.runIntake()))
+                        .finallyDo(() -> lightstrip.setShootCompletedColor()));
 
         // // Y button = Arm in COAST mode - probably not what you want
         //  new JoystickButton(m_driverController, XboxController.Button.kY.value)
@@ -115,9 +115,9 @@ public class RobotContainer {
         new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
             .whileTrue(m_arm.moveArmDownCommand());
 
-         // B button = Arm in BRAKE mode - this is the default
-         new JoystickButton(m_driverController, XboxController.Button.kB.value)
-            .onTrue(Commands.runOnce(()-> lightstrip.setColor(Color.kGreen)));
+        // // B button = Arm in BRAKE mode - this is the default
+        // new JoystickButton(m_driverController, XboxController.Button.kB.value)
+        // .onTrue(Commands.runOnce(()-> lightstrip.setColor(Color.kGreen)));
 
         //TODO Test this CAREFULLY. Need to measure encoder values at 90deg first
         // new JoystickButton(m_driverController, XboxController.Axis.kRightTrigger.value)
