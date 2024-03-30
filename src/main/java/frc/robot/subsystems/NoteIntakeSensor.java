@@ -22,7 +22,7 @@ public class NoteIntakeSensor extends SubsystemBase {
   private final double proximityThreshold = 150;
 
   // This color corresponds to the Orange color of the KNote.
-  private final Color kNoteTarget = new Color(0.53,0.37,0.09);
+  private final Color kNoteTarget = new Color(0.53, 0.37, 0.09);
 
   /** Creates a new LightSensor. */
   public NoteIntakeSensor() {
@@ -34,25 +34,30 @@ public class NoteIntakeSensor extends SubsystemBase {
 
   /**
    * Returns whether the kNote is visible from the light sensor.
+   * 
    * @return boolean
    */
   public boolean isNoteCaptured() {
     int proximity = m_colorSensor.getProximity();
     Color detectedColor = m_colorSensor.getColor();
     ColorMatchResult match = m_colorMatcher.matchColor(detectedColor);
-    boolean result =  match != null && match.color == kNoteTarget && proximity > proximityThreshold;
+    boolean result = match != null && match.color == kNoteTarget && proximity > proximityThreshold;
     return result;
   }
 
-  // @Override
-  // public void periodic() {
-  //   int proximity = m_colorSensor.getProximity();
-  //   Color detectedColor = m_colorSensor.getColor();
-  //   ColorMatchResult match = m_colorMatcher.matchColor(detectedColor);
-  //   SmartDashboard.putNumber("color-proximity", proximity);
-  //   SmartDashboard.putString("color-name", detectedColor.toString());
-  //   SmartDashboard.putString("color-match-result", match == null ? "" : match.toString());
-  //   boolean result =  match != null && match.color == kNoteTarget && proximity > proximityThreshold;
-  //   SmartDashboard.putBoolean("color-result", result);
-  // }
+  @Override
+  public void periodic() {
+    boolean measureColor = SmartDashboard.getBoolean("measureColor", false);
+
+    if (false) {
+      int proximity = m_colorSensor.getProximity();
+      Color detectedColor = m_colorSensor.getColor();
+      ColorMatchResult match = m_colorMatcher.matchColor(detectedColor);
+      SmartDashboard.putNumber("color-proximity", proximity);
+      SmartDashboard.putString("color-name", detectedColor.toString());
+      SmartDashboard.putString("color-match-result", match == null ? "" : match.toString());
+      boolean result = match != null && match.color == kNoteTarget && proximity > proximityThreshold;
+      SmartDashboard.putBoolean("color-result", result);
+    }
+  }
 }

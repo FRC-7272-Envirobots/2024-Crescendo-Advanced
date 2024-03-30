@@ -5,9 +5,13 @@
 package frc.robot;
 
 
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -18,18 +22,17 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * creating this project, you must also update the build.gradle file in the
  * project.
  */
+
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-  private DutyCycleEncoder armEncoder;
-  
-  // motors
-  // private static final String canBusName = "";
-  // private final TalonFX m_fx = new TalonFX(5, canBusName);
 
-  // controllers
-  // private final Joystick m_joystick = new Joystick(0);
+  private final TalonFX left_arm_motor = new TalonFX(12);
+  private final TalonFX right_arm_motor = new TalonFX(11);
+  
+  TalonFXConfiguration config;
+  Follower right_arm_follower;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -37,11 +40,28 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    //Arm motion logic
+    config = new TalonFXConfiguration();
+    config.Slot0.kP = 1;
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    // TODO: See if needed?
+    // left_motor.setInverted(false);
+    left_arm_motor.getConfigurator().apply(config);
+    left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
+
+    // TODO: See if needed? it shouldn't because of 2nd arg in follower init
+    // right_motor.setInverted(true);
+    right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
+    right_arm_motor.setControl(right_arm_follower);
+    // Also not needed?
+    //right_motor.setNeutralMode(NeutralModeValue.Brake);
+
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
-    armEncoder = new DutyCycleEncoder(8);
-        armEncoder.reset();
+    m_robotContainer = new RobotContainer(
+      left_arm_motor,
+      right_arm_motor
+    );
   }
 
   /**
@@ -61,13 +81,11 @@ public class Robot extends TimedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    SmartDashboard.putNumber("armEncoder", armEncoder.getPositionOffset());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
-    armEncoder.reset();
   }
 
   @Override
@@ -102,7 +120,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    armEncoder.reset();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
