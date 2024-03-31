@@ -10,6 +10,7 @@ import frc.robot.subsystems.AdvancedArmSubsystem;
 public class ArmTo90Deg extends Command {
   /** Creates a new ArmTo90Deg. */
   AdvancedArmSubsystem arm;
+
   public ArmTo90Deg(AdvancedArmSubsystem arm) {
     this.arm = arm;
     addRequirements(arm);
@@ -37,6 +38,6 @@ public class ArmTo90Deg extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return this.arm.getEncoderReading() >= 60; //TODO get this;
+    return this.arm.getEncoderReading() >= 60; // TODO get this;
   }
 }

@@ -22,20 +22,21 @@ import frc.robot.subsystems.DriveSubsystem;
 
 public class ChaseTagCommand extends Command {
 
-    // 32 x 27 chassis outer perimeter
-    //
-  // Coordinates docs: https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
-private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesToMeters(-16), 0, Units.inchesToMeters(3), new Rotation3d(0, Units.degreesToRadians(30), Math.toRadians(180)));
+  // 32 x 27 chassis outer perimeter
+  //
+  // Coordinates docs:
+  // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
+  private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesToMeters(-16), 0,
+      Units.inchesToMeters(3), new Rotation3d(0, Units.degreesToRadians(30), Math.toRadians(180)));
 
   private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
   private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
-  private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS =   new TrapezoidProfile.Constraints(8, 8);
-  
+  private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(8, 8);
+
   private static final int TAG_TO_CHASE = 2;
-  private static final Transform3d TAG_TO_GOAL = 
-      new Transform3d(
-          new Translation3d(1.5, 0.0, 0.0),
-          new Rotation3d(0.0, 0.0, Math.PI));
+  private static final Transform3d TAG_TO_GOAL = new Transform3d(
+      new Translation3d(1.5, 0.0, 0.0),
+      new Rotation3d(0.0, 0.0, Math.PI));
 
   private final PhotonCamera photonCamera;
   private final DriveSubsystem drivetrainSubsystem;
@@ -48,9 +49,9 @@ private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesT
   private PhotonTrackedTarget lastTarget;
 
   public ChaseTagCommand(
-        PhotonCamera photonCamera, 
-        DriveSubsystem drivetrainSubsystem,
-        Supplier<Pose2d> poseProvider) {
+      PhotonCamera photonCamera,
+      DriveSubsystem drivetrainSubsystem,
+      Supplier<Pose2d> poseProvider) {
     this.photonCamera = photonCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.poseProvider = poseProvider;
@@ -75,15 +76,14 @@ private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesT
   @Override
   public void execute() {
     var robotPose2d = poseProvider.get();
-    var robotPose = 
-        new Pose3d(
-            robotPose2d.getX(),
-            robotPose2d.getY(),
-            0.0, 
-            new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
+    var robotPose = new Pose3d(
+        robotPose2d.getX(),
+        robotPose2d.getY(),
+        0.0,
+        new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
 
     Shuffleboard.getTab("chase").add("drive-pose", robotPose2d);
-    
+
     var photonRes = photonCamera.getLatestResult();
     if (photonRes.hasTargets()) {
       // Find the tag we want to chase
@@ -91,14 +91,14 @@ private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesT
           .filter(t -> t.getFiducialId() == TAG_TO_CHASE)
           .filter(t -> !t.equals(lastTarget) && t.getPoseAmbiguity() <= .2 && t.getPoseAmbiguity() != -1)
           .findFirst();
-          
+
       Shuffleboard.getTab("chase").add("target-found", targetOpt.isPresent());
       if (targetOpt.isPresent()) {
-        
+
         var target = targetOpt.get();
         // This is new target data, so recalculate the goal
         lastTarget = target;
-        
+
         // Transform the robot's pose to find the camera's pose
         var cameraPose = robotPose.transformBy(ROBOT_TO_CAMERA);
 
@@ -109,11 +109,9 @@ private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesT
         var targetPose = cameraPose.transformBy(camToTarget);
         Shuffleboard.getTab("chase").add("target-pose", targetPose);
 
-        
         // Transform the tag's pose to set our goal
         var goalPose = targetPose.transformBy(TAG_TO_GOAL).toPose2d();
         Shuffleboard.getTab("chase").add("goal-pose", goalPose);
-
 
         // Drive
         xController.setGoal(goalPose.getX());
@@ -121,7 +119,7 @@ private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesT
         omegaController.setGoal(goalPose.getRotation().getRadians());
       }
     }
-    
+
     if (lastTarget == null) {
       // No target has been visible
       drivetrainSubsystem.driveChassisSpeeds(new ChassisSpeeds());
@@ -142,7 +140,6 @@ private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesT
         omegaSpeed = 0;
       }
 
-      
       Shuffleboard.getTab("chase").add("controller-x", xController);
       Shuffleboard.getTab("chase").add("controller-y", yController);
       Shuffleboard.getTab("chase").add("controller-o", omegaController);
@@ -151,10 +148,11 @@ private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(Units.inchesT
       Shuffleboard.getTab("chase").add("speed-y", ySpeed);
       Shuffleboard.getTab("chase").add("speed-o", omegaSpeed);
 
-      ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed, robotPose2d.getRotation());
+      ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed,
+          robotPose2d.getRotation());
       Shuffleboard.getTab("chase").add("chassis-speeds", chassisSpeeds);
       // drivetrainSubsystem.driveChassisSpeeds(chassisSpeeds);
-        
+
     }
   }
 

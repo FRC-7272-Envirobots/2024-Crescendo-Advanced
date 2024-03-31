@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -31,7 +30,7 @@ public class Robot extends TimedRobot {
 
   private final TalonFX left_arm_motor = new TalonFX(12);
   private final TalonFX right_arm_motor = new TalonFX(11);
-  
+
   TalonFXConfiguration config;
   Follower right_arm_follower;
 
@@ -41,10 +40,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    //Arm motion logic
+    // Arm motion logic
     config = new TalonFXConfiguration();
-    config.Slot0.kP = 1; //7.3697;
-    //config.Slot0.kI = ;
+    config.Slot0.kP = 1; // 7.3697;
+    // config.Slot0.kI = ;
     config.Slot0.kD = 0.056523;
     config.Slot0.kS = 0.20933;
     config.Slot0.kV = 0.10312;
@@ -54,23 +53,23 @@ public class Robot extends TimedRobot {
     config.Slot0.kG = 0.15387;
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
-    for(int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 5; ++i) {
       status = left_arm_motor.getConfigurator().apply(config);
-      if (status.isOK()) break;
+      if (status.isOK())
+        break;
     }
     if (!status.isOK()) {
       System.out.println("Could not configure device. Error: " + status.toString());
     }
-    //left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
+    // left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
     right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
     right_arm_motor.setControl(right_arm_follower);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer(
-      left_arm_motor,
-      right_arm_motor
-    );
+        left_arm_motor,
+        right_arm_motor);
   }
 
   /**

@@ -63,9 +63,9 @@ public class DriveSubsystem extends SubsystemBase {
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
       },
-      new Pose2d() // TODO: this sets a starting position of 0,0 - the middle of the field. Needs to be changed for competition. 
-      );
-
+      new Pose2d() // TODO: this sets a starting position of 0,0 - the middle of the field. Needs
+                   // to be changed for competition.
+  );
 
   private final Field2d field2d = new Field2d();
 
@@ -184,10 +184,10 @@ public class DriveSubsystem extends SubsystemBase {
     driveChassisSpeeds(chassisSpeeds);
   }
 
-
   public void driveChassisSpeeds(ChassisSpeeds chassisSpeeds) {
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, 1.0); // TODO: restore for full speed: DriveConstants.kMaxSpeedMetersPerSecond);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, 1.0); // TODO: restore for full speed:
+                                                                          // DriveConstants.kMaxSpeedMetersPerSecond);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
@@ -195,13 +195,17 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   // /**
-  //  * Sets the wheels into an X formation to prevent movement.
-  //  */
+  // * Sets the wheels into an X formation to prevent movement.
+  // */
   // public void setX() {
-  //   m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-  //   m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-  //   m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-  //   m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+  // m_frontLeft.setDesiredState(new SwerveModuleState(0,
+  // Rotation2d.fromDegrees(45)));
+  // m_frontRight.setDesiredState(new SwerveModuleState(0,
+  // Rotation2d.fromDegrees(-45)));
+  // m_rearLeft.setDesiredState(new SwerveModuleState(0,
+  // Rotation2d.fromDegrees(-45)));
+  // m_rearRight.setDesiredState(new SwerveModuleState(0,
+  // Rotation2d.fromDegrees(45)));
   // }
 
   /**
@@ -220,34 +224,33 @@ public class DriveSubsystem extends SubsystemBase {
 
   // /** Resets the drive encoders to currently read a position of 0. */
   // public void resetEncoders() {
-  //   m_frontLeft.resetEncoders();
-  //   m_rearLeft.resetEncoders();
-  //   m_frontRight.resetEncoders();
-  //   m_rearRight.resetEncoders();
+  // m_frontLeft.resetEncoders();
+  // m_rearLeft.resetEncoders();
+  // m_frontRight.resetEncoders();
+  // m_rearRight.resetEncoders();
   // }
 
   // /** Zeroes the heading of the robot. */
   // public void zeroHeading() {
-  //   m_gyro.reset();
+  // m_gyro.reset();
   // }
 
   // /**
-  //  * Returns the heading of the robot.
-  //  *
-  //  * @return the robot's heading in degrees, from -180 to 180
-  //  */
+  // * Returns the heading of the robot.
+  // *
+  // * @return the robot's heading in degrees, from -180 to 180
+  // */
   // public double getHeading() {
-  //   return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
+  // return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
   // }
 
   // /**
-  //  * Returns the turn rate of the robot.
-  //  *
-  //  * @return The turn rate of the robot, in degrees per second
-  //  */
+  // * Returns the turn rate of the robot.
+  // *
+  // * @return The turn rate of the robot, in degrees per second
+  // */
   // public double getTurnRate() {
-  //   return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+  // return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   // }
-
 
 }
