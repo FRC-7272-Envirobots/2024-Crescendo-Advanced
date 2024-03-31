@@ -162,9 +162,9 @@ public class RobotContainer {
                 new JoystickButton(m_arcadeBox, 4)
                                 .whileTrue(new ArmToPosition(m_arm, 82, true));
 
-                EventLoop m_loop = new EventLoop();                
-                m_arcadeBox.axisGreaterThan(0, 0, m_loop)
-                        .ifHigh(() ->new ArmToPosition(m_arm, 2, false));
+                EventLoop m_loop = new EventLoop();
+                m_arcadeBox.axisGreaterThan(0, 0.5, m_loop)
+                                .ifHigh(() -> new ArmToPosition(m_arm, 2, false));
         }
 
         /**

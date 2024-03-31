@@ -34,8 +34,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
 
     private DutyCycleEncoder armEncoder;
 
-    // PositionVoltage positionControl;
-
     public AdvancedArmSubsystem() {
         super();
         setName("arm");
@@ -125,10 +123,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         left_arm_motor.set(pct_power);
     }
 
-    // public void setPosition(double position) {
-    // left_arm_motor.setControl(positionControl.withPosition(position).withVelocity(35).withSlot(0));
-    // }
-
     public void setControl(PositionVoltage control) {
         left_arm_motor.setControl(control);
     }
@@ -140,46 +134,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public double getVelocity() {
         return left_arm_motor.getVelocity().getValueAsDouble();
     }
-    // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
-    // private final MutableMeasure<Voltage> m_appliedVoltage =
-    // mutable(Volts.of(0));
-    // // Mutable holder for unit-safe linear distance values, persisted to avoid
-    // // reallocation.
-    // private final MutableMeasure<Angle> m_angle = mutable(Rotations.of(0));
-    // // Mutable holder for unit-safe linear velocity values, persisted to avoid
-    // // reallocation.
-    // private final MutableMeasure<Velocity<Angle>> m_velocity =
-    // mutable(RotationsPerSecond.of(0));
-
-    // // Create a new SysId routine for characterizing the shooter.
-    // private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
-    // // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-    // new SysIdRoutine.Config()
-
-    // ),
-    // new SysIdRoutine.Mechanism(
-    // // Tell SysId how to plumb the driving voltage to the motor(s).
-    // (Measure<Voltage> volts) -> {
-    // left_arm_motor.setVoltage(volts.in(Volts));
-    // },
-    // // Tell SysId how to record a frame of data for each motor on the mechanism
-    // // being
-    // // characterized.
-    // log -> {
-    // // Record a frame for the shooter motor.
-    // SignalLogger.writeString("state", "arm-left");
-    // SignalLogger.writeDouble("voltage",
-    // left_arm_motor.getMotorVoltage().getValueAsDouble() *
-    // RobotController.getBatteryVoltage());
-    // SignalLogger.writeDouble("position",
-    // left_arm_motor.getPosition().getValueAsDouble());
-    // SignalLogger.writeDouble("velocity",
-    // left_arm_motor.getRotorVelocity().getValueAsDouble());
-    // },
-    // // Tell SysId to make generated commands require this subsystem, suffix test
-    // // state in
-    // // WPILog with this subsystem's name ("shooter")
-    // this));
 
     private final VoltageOut m_sysidControl = new VoltageOut(0);
     private SysIdRoutine m_SysIdRoutine = new SysIdRoutine(
