@@ -38,6 +38,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import java.util.List;
 
+import org.photonvision.PhotonCamera;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 
 /*
@@ -58,6 +60,7 @@ public class RobotContainer {
     private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
     private final AdvancedArmSubsystem m_arm;
     private final Lightstrip lightstrip = new Lightstrip();
+//     private final PhotonCamera photonCamera = new PhotonCamera("7272-limelight-1");
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -86,7 +89,6 @@ public class RobotContainer {
                 // Turning is controlled by the X axis of the right stick.
                 new RunCommand(
                         () -> m_robotDrive.drive(
-
                                 -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
                                 -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
                                 -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
@@ -127,9 +129,10 @@ public class RobotContainer {
         // new JoystickButton(m_driverController, XboxController.Button.kY.value)
         // .onTrue(m_arm.setCoastModeCommand());
 
-        // // B button = Arm in BRAKE mode - this is the default
+        // B button = Arm in BRAKE mode - this is the default
+        // ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera, m_robotDrive, ()-> m_robotDrive.getPose());
         // new JoystickButton(m_driverController, XboxController.Button.kB.value)
-        // .onTrue(m_arm.setBrakeModeCommand());
+        // .whileTrue(chaseTagCommand);
 
         // R1 / RB button - Arm moves up
         new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
