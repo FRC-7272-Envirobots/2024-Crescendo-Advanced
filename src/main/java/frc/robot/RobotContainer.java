@@ -22,7 +22,6 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.ArmToPosition;
-import frc.robot.commands.ArmToPositionControl;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
@@ -141,30 +140,75 @@ public class RobotContainer {
                 new JoystickButton(m_arcadeBox, 1)
                                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
 
-                new JoystickButton(m_arcadeBox, 2)
-                                .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+                // Archade Box Top Buttons
+                // Turbo/Macro/Home = Nope
+                // Share = Button 7
+                // Options = Button 8
+                // L3/SL = Nope... Shorted out? Probably 9
+                // R3/SR = Button 10
 
-                new JoystickButton(m_arcadeBox, 3)
-                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kForward));
-
-                new JoystickButton(m_arcadeBox, 4)
-                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-                // Shooting angle
-                new JoystickButton(m_arcadeBox, 5)
-                                .whileTrue(new ArmToPositionControl(m_arm, 20, true));
-                new JoystickButton(m_arcadeBox, 6)
-                                .whileTrue(new ArmToPosition(m_arm, 20, true));
-
-                // Resting angle
-                new JoystickButton(m_arcadeBox, 3)
-                                .whileTrue(new ArmToPositionControl(m_arm, 82, true));
-                new JoystickButton(m_arcadeBox, 4)
-                                .whileTrue(new ArmToPosition(m_arm, 82, true));
+                // Archade Box Buttons
+                // L1/LB = Button 5
+                // L2/LT = Axis 2
+                // X = Button 3
+                // A = Button 1
+                // Y = Button 4
+                // B = Button 2
+                // R1/RB = Button 6
+                // R2/RT = Axis 3
 
                 EventLoop m_loop = new EventLoop();
-                m_arcadeBox.axisGreaterThan(0, 0.5, m_loop)
-                                .ifHigh(() -> new ArmToPosition(m_arm, 2, false));
+
+                // System Identification Routines
+                new JoystickButton(m_arcadeBox, 7)
+                                .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+                new JoystickButton(m_arcadeBox, 8)
+                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kForward));
+
+                // If only the button worked.
+                new JoystickButton(m_arcadeBox, 9)
+                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+                new JoystickButton(m_arcadeBox, 10)
+                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+                // Intake angle
+                double intakePosition = -56.0;
+                // Tap (L1/LB) = Button 5
+                new JoystickButton(m_arcadeBox, 5)
+                                .onTrue(new ArmToPosition(m_arm, intakePosition, true));
+                // Hold (L2/LT) = Axis 2
+                m_arcadeBox.axisGreaterThan(2, 0.0, m_loop)
+                                .ifHigh(() -> new ArmToPosition(m_arm, intakePosition, true));
+
+                // Shooting angle
+                double shootingPosition = -20.0;
+                // Tap (X) = Button 3
+                new JoystickButton(m_arcadeBox, 3)
+                                .onTrue(new ArmToPosition(m_arm, shootingPosition, true));
+                // Hold (A) = Button 1
+                new JoystickButton(m_arcadeBox, 1)
+                                .whileTrue(new ArmToPosition(m_arm, shootingPosition, true));
+
+                // Resting angle
+                double restingPosition = 0.0;
+                // Tap (Y) = Button 4
+                new JoystickButton(m_arcadeBox, 4)
+                                .onTrue(new ArmToPosition(m_arm, restingPosition, true));
+                // Hold (B) = Button 2
+                new JoystickButton(m_arcadeBox, 2)
+                                .whileTrue(new ArmToPosition(m_arm, restingPosition, true));
+
+                double ampPosition = 20.0;
+
+                // Tap (R1/RB) = Button 6
+                new JoystickButton(m_arcadeBox, 6)
+                                .onTrue(new ArmToPosition(m_arm, ampPosition, true));
+
+                // Hold (R2/RT) = Axis 3 
+                m_arcadeBox.axisGreaterThan(3, 0.5, m_loop)
+                                .ifHigh(() -> new ArmToPosition(m_arm, ampPosition, true));
         }
 
         /**

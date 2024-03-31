@@ -75,7 +75,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
          * Optimize out the other signals, since they're not particularly helpful for us
          */
         left_arm_motor.optimizeBusUtilization();
-
         SignalLogger.start();
     }
 

@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,26 +30,27 @@ public class ArmToPosition extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    System.out.println("init");
+    // System.out.println("init");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    System.out.println("exec");
+    // System.out.println("exec");
     m_position.Slot = 0;
     m_position.Position = position;
     m_position.Velocity = 35;
     arm.setControl(m_position);
-    System.out.println("arm curr position: " + arm.getPosition());
-    System.out.println("arm curr velocity: " + arm.getVelocity());
+    // System.out.println("arm curr position: " + arm.getPosition());
+    // System.out.println("arm curr velocity: " + arm.getVelocity());
 
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("end");
+    arm.moveArm(0);
+    // System.out.println("end");
   }
 
   // Returns true when the command should end.
