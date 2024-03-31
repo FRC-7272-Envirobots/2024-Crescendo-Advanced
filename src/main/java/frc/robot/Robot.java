@@ -4,13 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.StatusCode;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -28,48 +21,16 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
-  private final TalonFX left_arm_motor = new TalonFX(12);
-  private final TalonFX right_arm_motor = new TalonFX(11);
-
-  TalonFXConfiguration config;
-  Follower right_arm_follower;
-
   /**
    * This function is run when the robot is first started up and should be used
    * for any initialization code.
    */
   @Override
   public void robotInit() {
-    // Arm motion logic
-    config = new TalonFXConfiguration();
-    config.Slot0.kP = 1; // 7.3697;
-    // config.Slot0.kI = ;
-    config.Slot0.kD = 0.056523;
-    config.Slot0.kS = 0.20933;
-    config.Slot0.kV = 0.10312;
-    config.Slot0.kA = 0.00085311;
-
-    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-    config.Slot0.kG = 0.15387;
-
-    StatusCode status = StatusCode.StatusCodeNotInitialized;
-    for (int i = 0; i < 5; ++i) {
-      status = left_arm_motor.getConfigurator().apply(config);
-      if (status.isOK())
-        break;
-    }
-    if (!status.isOK()) {
-      System.out.println("Could not configure device. Error: " + status.toString());
-    }
-    // left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
-    right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
-    right_arm_motor.setControl(right_arm_follower);
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer(
-        left_arm_motor,
-        right_arm_motor);
+    m_robotContainer = new RobotContainer();
   }
 
   /**

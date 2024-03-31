@@ -2,9 +2,13 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.Measure;
@@ -21,35 +25,58 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     private static double move_up_pct_power = 0.4;
     private static double move_down_pct_power = -0.4;
     private static double hold_position_pct_power = 0;
-    private TalonFX left_motor;
-    private TalonFX right_motor;
+
+    private final TalonFX left_arm_motor = new TalonFX(12);
+    private final TalonFX right_arm_motor = new TalonFX(11);
+
+    TalonFXConfiguration config;
+    Follower right_arm_follower;
 
     private DutyCycleEncoder armEncoder;
 
     // PositionVoltage positionControl;
 
-    public AdvancedArmSubsystem(TalonFX left_motor, TalonFX right_motor) {
+    public AdvancedArmSubsystem() {
         super();
-        this.left_motor = left_motor;
-        this.right_motor = right_motor;
-        armEncoder = new DutyCycleEncoder(8);
-        // positionControl = new PositionVoltage(0.0);
-
         setName("arm");
 
-        // TalonFXConfiguration cfg = new TalonFXConfiguration();
-        // left_motor.getConfigurator().apply(cfg);
+        // Arm motion logic
+        config = new TalonFXConfiguration();
+        config.Slot0.kP = 1; // value from SysID tuning: 7.3697 but its too fast and scary;
+        // "Nobody uses I" apparently
+        // config.Slot0.kI = ;
+        config.Slot0.kD = 0.056523;
+        config.Slot0.kS = 0.20933;
+        config.Slot0.kV = 0.10312;
+        config.Slot0.kA = 0.00085311;
+
+        config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+        config.Slot0.kG = 0.15387;
+
+        StatusCode status = StatusCode.StatusCodeNotInitialized;
+        for (int i = 0; i < 5; ++i) {
+            status = left_arm_motor.getConfigurator().apply(config);
+            if (status.isOK())
+                break;
+        }
+        if (!status.isOK()) {
+            System.out.println("Could not configure device. Error: " + status.toString());
+        }
+        right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
+        right_arm_motor.setControl(right_arm_follower);
+
+        armEncoder = new DutyCycleEncoder(8);
 
         /* Speed up signals for better charaterization data */
         BaseStatusSignal.setUpdateFrequencyForAll(250,
-                left_motor.getPosition(),
-                left_motor.getVelocity(),
-                left_motor.getMotorVoltage());
+                left_arm_motor.getPosition(),
+                left_arm_motor.getVelocity(),
+                left_arm_motor.getMotorVoltage());
 
         /*
          * Optimize out the other signals, since they're not particularly helpful for us
          */
-        left_motor.optimizeBusUtilization();
+        left_arm_motor.optimizeBusUtilization();
 
         SignalLogger.start();
     }
@@ -57,32 +84,32 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public Command moveArmUpCommand() {
         return Commands.startEnd(
                 () -> {
-                    left_motor.set(move_up_pct_power);
+                    left_arm_motor.set(move_up_pct_power);
                 },
                 () -> {
-                    left_motor.set(hold_position_pct_power);
+                    left_arm_motor.set(hold_position_pct_power);
                 }, this);
     }
 
     public Command moveArmDownCommand() {
         return Commands.startEnd(
                 () -> {
-                    left_motor.set(move_down_pct_power);
+                    left_arm_motor.set(move_down_pct_power);
                 },
                 () -> {
-                    left_motor.set(hold_position_pct_power);
+                    left_arm_motor.set(hold_position_pct_power);
                 }, this);
     }
 
     public Command setBrakeModeCommand() {
         return this.runOnce(() -> {
-            left_motor.setNeutralMode(NeutralModeValue.Brake);
+            left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
         });
     }
 
     public Command setCoastModeCommand() {
         return this.runOnce(() -> {
-            left_motor.setNeutralMode(NeutralModeValue.Coast);
+            left_arm_motor.setNeutralMode(NeutralModeValue.Coast);
         });
     }
 
@@ -95,23 +122,23 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     }
 
     public void moveArm(double pct_power) {
-        left_motor.set(pct_power);
+        left_arm_motor.set(pct_power);
     }
 
     // public void setPosition(double position) {
-    // left_motor.setControl(positionControl.withPosition(position).withVelocity(35).withSlot(0));
+    // left_arm_motor.setControl(positionControl.withPosition(position).withVelocity(35).withSlot(0));
     // }
 
     public void setControl(PositionVoltage control) {
-        left_motor.setControl(control);
+        left_arm_motor.setControl(control);
     }
 
     public double getPosition() {
-        return left_motor.getPosition().getValueAsDouble();
+        return left_arm_motor.getPosition().getValueAsDouble();
     }
 
     public double getVelocity() {
-        return left_motor.getVelocity().getValueAsDouble();
+        return left_arm_motor.getVelocity().getValueAsDouble();
     }
     // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
     // private final MutableMeasure<Voltage> m_appliedVoltage =
@@ -133,7 +160,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     // new SysIdRoutine.Mechanism(
     // // Tell SysId how to plumb the driving voltage to the motor(s).
     // (Measure<Voltage> volts) -> {
-    // left_motor.setVoltage(volts.in(Volts));
+    // left_arm_motor.setVoltage(volts.in(Volts));
     // },
     // // Tell SysId how to record a frame of data for each motor on the mechanism
     // // being
@@ -142,12 +169,12 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     // // Record a frame for the shooter motor.
     // SignalLogger.writeString("state", "arm-left");
     // SignalLogger.writeDouble("voltage",
-    // left_motor.getMotorVoltage().getValueAsDouble() *
+    // left_arm_motor.getMotorVoltage().getValueAsDouble() *
     // RobotController.getBatteryVoltage());
     // SignalLogger.writeDouble("position",
-    // left_motor.getPosition().getValueAsDouble());
+    // left_arm_motor.getPosition().getValueAsDouble());
     // SignalLogger.writeDouble("velocity",
-    // left_motor.getRotorVelocity().getValueAsDouble());
+    // left_arm_motor.getRotorVelocity().getValueAsDouble());
     // },
     // // Tell SysId to make generated commands require this subsystem, suffix test
     // // state in
@@ -163,7 +190,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
                           // Log state with Phoenix SignalLogger class
                     (state) -> SignalLogger.writeString("state", state.toString())),
             new SysIdRoutine.Mechanism(
-                    (Measure<Voltage> volts) -> left_motor.setControl(m_sysidControl.withOutput(volts.in(Volts))),
+                    (Measure<Voltage> volts) -> left_arm_motor.setControl(m_sysidControl.withOutput(volts.in(Volts))),
                     null,
                     this));
 

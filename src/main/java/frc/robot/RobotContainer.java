@@ -17,6 +17,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
@@ -37,8 +38,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import java.util.List;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -46,10 +45,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-        // Robot.java components
-        private TalonFX left_arm_motor;
-        private TalonFX right_arm_motor;
-
         // The robot's subsystems
         private final DriveSubsystem m_robotDrive = new DriveSubsystem();
         public final NoteIntakeSensor m_lightSensor = new NoteIntakeSensor();
@@ -67,10 +62,9 @@ public class RobotContainer {
         /**
          * The container for the robot. Contains subsystems, OI devices, and commands.
          */
-        public RobotContainer(TalonFX left_arm_motor, TalonFX right_arm_motor) {
-                this.left_arm_motor = left_arm_motor;
-                this.right_arm_motor = right_arm_motor;
-                this.m_arm = new AdvancedArmSubsystem(left_arm_motor, right_arm_motor);
+        public RobotContainer() {
+
+                this.m_arm = new AdvancedArmSubsystem();
 
                 // Configure the button bindings
                 configureButtonBindings();
@@ -144,11 +138,6 @@ public class RobotContainer {
                 new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
                                 .whileTrue(m_arm.moveArmDownCommand());
 
-                // TODO Test this CAREFULLY. Need to measure encoder values at 90deg first
-                // new JoystickButton(m_driverController,
-                // XboxController.Axis.kRightTrigger.value)
-                // .whileTrue(new ArmTo90Deg(m_arm));
-
                 new JoystickButton(m_arcadeBox, 1)
                                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
 
@@ -172,6 +161,10 @@ public class RobotContainer {
                                 .whileTrue(new ArmToPositionControl(m_arm, 82, true));
                 new JoystickButton(m_arcadeBox, 4)
                                 .whileTrue(new ArmToPosition(m_arm, 82, true));
+
+                EventLoop m_loop = new EventLoop();                
+                m_arcadeBox.axisGreaterThan(0, 0, m_loop)
+                        .ifHigh(() ->new ArmToPosition(m_arm, 2, false));
         }
 
         /**
