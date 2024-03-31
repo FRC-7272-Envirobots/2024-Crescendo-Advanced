@@ -14,7 +14,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,7 +35,7 @@ public class ChaseTagCommand extends Command {
   private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
   private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = new TrapezoidProfile.Constraints(8, 8);
 
-  private static final int TAG_TO_CHASE = 2;
+  private static final int TAG_TO_CHASE = 4;
   private static final Transform3d TAG_TO_GOAL = new Transform3d(
       new Translation3d(1.5, 0.0, 0.0),
       new Rotation3d(0.0, 0.0, Math.PI));
@@ -47,6 +49,11 @@ public class ChaseTagCommand extends Command {
   private final ProfiledPIDController omegaController = new ProfiledPIDController(2, 0, 0, OMEGA_CONSTRAINTS);
 
   private PhotonTrackedTarget lastTarget;
+  private SimpleWidget targetFound;
+  private SimpleWidget hasTargets;
+  private SimpleWidget xSpeedWidget;
+  private SimpleWidget ySpeedWidget;
+  private SimpleWidget oSpeedWidget;
 
   public ChaseTagCommand(
       PhotonCamera photonCamera,
@@ -60,6 +67,13 @@ public class ChaseTagCommand extends Command {
     yController.setTolerance(0.2);
     omegaController.setTolerance(Units.degreesToRadians(3));
     omegaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    //ShuffleBoard
+    this.targetFound = Shuffleboard.getTab("chase").add("target-found", false);
+    this.hasTargets = Shuffleboard.getTab("chase").add("has-targets", false);
+    this.xSpeedWidget = Shuffleboard.getTab("chase").add("speed-x", 0);
+    this.ySpeedWidget = Shuffleboard.getTab("chase").add("speed-y", 0);
+    this.oSpeedWidget = Shuffleboard.getTab("chase").add("speed-o", 0);
 
     addRequirements(drivetrainSubsystem);
   }
@@ -82,17 +96,18 @@ public class ChaseTagCommand extends Command {
         0.0,
         new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
 
-    Shuffleboard.getTab("chase").add("drive-pose", robotPose2d);
+    //Shuffleboard.getTab("chase").add("drive-pose", robotPose2d);
 
     var photonRes = photonCamera.getLatestResult();
+    hasTargets.getEntry("has-targets").setBoolean(photonRes.hasTargets());
     if (photonRes.hasTargets()) {
       // Find the tag we want to chase
       var targetOpt = photonRes.getTargets().stream()
           .filter(t -> t.getFiducialId() == TAG_TO_CHASE)
-          .filter(t -> !t.equals(lastTarget) && t.getPoseAmbiguity() <= .2 && t.getPoseAmbiguity() != -1)
+          //.filter(t -> !t.equals(lastTarget) && t.getPoseAmbiguity() <= .2 && t.getPoseAmbiguity() != -1)
           .findFirst();
 
-      Shuffleboard.getTab("chase").add("target-found", targetOpt.isPresent());
+      targetFound.getEntry("target-found").setBoolean(targetOpt.isPresent());
       if (targetOpt.isPresent()) {
 
         var target = targetOpt.get();
@@ -104,14 +119,14 @@ public class ChaseTagCommand extends Command {
 
         // Trasnform the camera's pose to the target's pose
         var camToTarget = target.getBestCameraToTarget();
-        Shuffleboard.getTab("chase").add("cam-to-target", camToTarget);
+        // Shuffleboard.getTab("chase").add("cam-to-target", camToTarget);
 
         var targetPose = cameraPose.transformBy(camToTarget);
-        Shuffleboard.getTab("chase").add("target-pose", targetPose);
+        // Shuffleboard.getTab("chase").add("target-pose", targetPose);
 
         // Transform the tag's pose to set our goal
         var goalPose = targetPose.transformBy(TAG_TO_GOAL).toPose2d();
-        Shuffleboard.getTab("chase").add("goal-pose", goalPose);
+        // Shuffleboard.getTab("chase").add("goal-pose", goalPose);
 
         // Drive
         xController.setGoal(goalPose.getX());
@@ -140,17 +155,17 @@ public class ChaseTagCommand extends Command {
         omegaSpeed = 0;
       }
 
-      Shuffleboard.getTab("chase").add("controller-x", xController);
-      Shuffleboard.getTab("chase").add("controller-y", yController);
-      Shuffleboard.getTab("chase").add("controller-o", omegaController);
+      // Shuffleboard.getTab("chase").add("controller-x", xController);
+      // Shuffleboard.getTab("chase").add("controller-y", yController);
+      // Shuffleboard.getTab("chase").add("controller-o", omegaController);
 
-      Shuffleboard.getTab("chase").add("speed-x", xSpeed);
-      Shuffleboard.getTab("chase").add("speed-y", ySpeed);
-      Shuffleboard.getTab("chase").add("speed-o", omegaSpeed);
+      xSpeedWidget.getEntry("speed-x").setDouble(xSpeed);
+      ySpeedWidget.getEntry("speed-y").setDouble(ySpeed);
+      oSpeedWidget.getEntry("speed-o").setDouble(omegaSpeed);
 
       ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed,
           robotPose2d.getRotation());
-      Shuffleboard.getTab("chase").add("chassis-speeds", chassisSpeeds);
+      // Shuffleboard.getTab("chase").add("chassis-speeds", chassisSpeeds.);
       // drivetrainSubsystem.driveChassisSpeeds(chassisSpeeds);
 
     }
