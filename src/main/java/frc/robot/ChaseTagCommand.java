@@ -68,7 +68,7 @@ public class ChaseTagCommand extends Command {
     omegaController.setTolerance(Units.degreesToRadians(3));
     omegaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    //ShuffleBoard
+    // ShuffleBoard
     this.targetFound = Shuffleboard.getTab("chase").add("target-found", false);
     this.hasTargets = Shuffleboard.getTab("chase").add("has-targets", false);
     this.xSpeedWidget = Shuffleboard.getTab("chase").add("speed-x", 0);
@@ -96,7 +96,7 @@ public class ChaseTagCommand extends Command {
         0.0,
         new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
 
-    //Shuffleboard.getTab("chase").add("drive-pose", robotPose2d);
+    // Shuffleboard.getTab("chase").add("drive-pose", robotPose2d);
 
     var photonRes = photonCamera.getLatestResult();
     hasTargets.getEntry("has-targets").setBoolean(photonRes.hasTargets());
@@ -104,7 +104,8 @@ public class ChaseTagCommand extends Command {
       // Find the tag we want to chase
       var targetOpt = photonRes.getTargets().stream()
           .filter(t -> t.getFiducialId() == TAG_TO_CHASE)
-          //.filter(t -> !t.equals(lastTarget) && t.getPoseAmbiguity() <= .2 && t.getPoseAmbiguity() != -1)
+          // .filter(t -> !t.equals(lastTarget) && t.getPoseAmbiguity() <= .2 &&
+          // t.getPoseAmbiguity() != -1)
           .findFirst();
 
       targetFound.getEntry("target-found").setBoolean(targetOpt.isPresent());

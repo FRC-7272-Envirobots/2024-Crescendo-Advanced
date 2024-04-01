@@ -22,6 +22,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.ArmToPosition;
+import frc.robot.commands.LightstripEnvirobots;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
@@ -70,6 +71,8 @@ public class RobotContainer {
 
                 // Configure the button bindings
                 configureButtonBindings();
+
+                lightstrip.setDefaultCommand(new LightstripEnvirobots(lightstrip));
 
                 // Set up camera server
                 UsbCamera frontCamera = CameraServer.startAutomaticCapture("front", 0);

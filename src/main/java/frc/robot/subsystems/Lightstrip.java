@@ -4,10 +4,11 @@
 
 package frc.robot.subsystems;
 
+import java.awt.Color;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -25,11 +26,12 @@ public class Lightstrip extends SubsystemBase {
   private int start_blue = 67;
   private int end_blue = 106;
   private Timer timer = new Timer();
-  public void alternate(Color color1, Color color2){
+
+  public void alternate(Color color1, Color color2) {
     timer.restart();
-    
-    
+
   }
+
   /** Creates a new Launcher. */
   public Lightstrip() {
     super();
@@ -44,37 +46,38 @@ public class Lightstrip extends SubsystemBase {
     m_led.setData(m_ledBuffer);
     m_led.start();
 
-    this.setColor(Color.kGreen);
+    this.setColor(Color.GREEN);
   }
 
   public Command setIntakeSuccessColor() {
-    return runOnce(() -> setColor(Color.kOrangeRed));
+    return runOnce(() -> setColor(Color.ORANGE));
   }
 
   public void setShootCompletedColor() {
-    setColor(Color.kGreen);
+    setColor(Color.GREEN);
   }
 
-   public void setColor(Color color) {
+  public void lightSidesTest() {
     for (var i = 0; i < m_ledBuffer.getLength(); i++) {
       // Sets the specified LED to the RGB values for red
       if (i <= 41) {
         m_ledBuffer.setRGB(i, 255, 0, 0);
-      } else if (i > 41 && i < 67){
+      } else if (i > 41 && i < 67) {
         m_ledBuffer.setRGB(i, 0, 255, 0);
-      } else if (i >= 67 && i < 106){ 
-        m_ledBuffer.setRGB(i, 0, 0, 255 );
+      } else if (i >= 67 && i < 106) {
+        m_ledBuffer.setRGB(i, 0, 0, 255);
       } else {
-        m_ledBuffer.setRGB(i,20,20,20);
+        m_ledBuffer.setRGB(i, 20, 20, 20);
       }
-  
-      // m_ledBuffer.setRGB(i,color.getRed(), color.getGreen(), color.getBlue());
-      //{
-        // m_ledBuffer.setRGB(i, 0,255,0);
-      //}
     }
-      m_led.setData(m_ledBuffer);
+    m_led.setData(m_ledBuffer);
+  }
+
+  public void setColor(Color color) {
+    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+      m_ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
+    }
+    m_led.setData(m_ledBuffer);
   }
 
 }
-
