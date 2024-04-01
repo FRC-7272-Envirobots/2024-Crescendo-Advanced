@@ -60,6 +60,10 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         if (!status.isOK()) {
             System.out.println("Could not configure device. Error: " + status.toString());
         }
+        // reset relative position of motor to zero.
+        // Robot MUST be in start position when robot is turned on, or press the reset button on roborio.
+        left_arm_motor.setPosition(0);
+
         right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
         right_arm_motor.setControl(right_arm_follower);
 

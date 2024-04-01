@@ -25,6 +25,7 @@ import frc.robot.commands.ArmToPosition;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
+import frc.robot.subsystems.CameraOverlay;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.NoteIntakeSensor;
 import frc.robot.subsystems.Lightstrip;
@@ -36,6 +37,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import java.util.List;
+
+import org.photonvision.PhotonCamera;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -51,8 +54,8 @@ public class RobotContainer {
         private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
         private final AdvancedArmSubsystem m_arm;
         private final Lightstrip lightstrip = new Lightstrip();
-        // private final PhotonCamera photonCamera = new
-        // PhotonCamera("7272-limelight-1");
+        private final PhotonCamera photonCamera = new PhotonCamera("7272-limelight-1");
+        private final CameraOverlay cameraOverlay = new CameraOverlay();
 
         // The driver's controller
         XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -119,15 +122,15 @@ public class RobotContainer {
                                                                 m_intake.runIntake()))
                                                 .finallyDo(() -> lightstrip.setShootCompletedColor()));
 
-                // // Y button = Arm in COAST mode - probably not what you want
+                // Y button = Arm in COAST mode - probably not what you want
                 // new JoystickButton(m_driverController, XboxController.Button.kY.value)
                 // .onTrue(m_arm.setCoastModeCommand());
 
                 // B button = Arm in BRAKE mode - this is the default
-                // ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
-                // m_robotDrive, ()-> m_robotDrive.getPose());
-                // new JoystickButton(m_driverController, XboxController.Button.kB.value)
-                // .whileTrue(chaseTagCommand);
+                ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
+                                m_robotDrive, () -> m_robotDrive.getPose());
+                new JoystickButton(m_driverController, XboxController.Button.kB.value)
+                                .whileTrue(chaseTagCommand);
 
                 // R1 / RB button - Arm moves up
                 new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
@@ -174,7 +177,7 @@ public class RobotContainer {
                                 .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
                 // Intake angle
-                double intakePosition = -56.0;
+                double intakePosition = -66;
                 // Tap (L1/LB) = Button 5
                 new JoystickButton(m_arcadeBox, 5)
                                 .onTrue(new ArmToPosition(m_arm, intakePosition, true));
@@ -183,7 +186,7 @@ public class RobotContainer {
                                 .ifHigh(() -> new ArmToPosition(m_arm, intakePosition, true));
 
                 // Shooting angle
-                double shootingPosition = -20.0;
+                double shootingPosition = -28.0;
                 // Tap (X) = Button 3
                 new JoystickButton(m_arcadeBox, 3)
                                 .onTrue(new ArmToPosition(m_arm, shootingPosition, true));
@@ -200,13 +203,13 @@ public class RobotContainer {
                 new JoystickButton(m_arcadeBox, 2)
                                 .whileTrue(new ArmToPosition(m_arm, restingPosition, true));
 
-                double ampPosition = 20.0;
+                double ampPosition = 10.0;
 
                 // Tap (R1/RB) = Button 6
                 new JoystickButton(m_arcadeBox, 6)
                                 .onTrue(new ArmToPosition(m_arm, ampPosition, true));
 
-                // Hold (R2/RT) = Axis 3 
+                // Hold (R2/RT) = Axis 3
                 m_arcadeBox.axisGreaterThan(3, 0.5, m_loop)
                                 .ifHigh(() -> new ArmToPosition(m_arm, ampPosition, true));
         }
