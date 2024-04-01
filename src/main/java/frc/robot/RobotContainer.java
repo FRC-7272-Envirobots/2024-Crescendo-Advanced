@@ -25,6 +25,7 @@ import frc.robot.commands.ArmToPosition;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
+import frc.robot.subsystems.CameraOverlay;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.NoteIntakeSensor;
 import frc.robot.subsystems.Lightstrip;
@@ -54,6 +55,7 @@ public class RobotContainer {
         private final AdvancedArmSubsystem m_arm;
         private final Lightstrip lightstrip = new Lightstrip();
         private final PhotonCamera photonCamera = new PhotonCamera("7272-limelight-1");
+        private final CameraOverlay cameraOverlay = new CameraOverlay();
 
         // The driver's controller
         XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
