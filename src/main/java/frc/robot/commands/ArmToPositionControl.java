@@ -26,7 +26,7 @@ public class ArmToPositionControl extends Command {
 
   /** Creates a new ArmToShooterAngle. */
   public ArmToPositionControl(AdvancedArmSubsystem arm, double position, boolean continuous) {
-    this.arm=arm;
+    this.arm = arm;
     this.position = position;
     this.continuous = continuous;
     m_goal = new TrapezoidProfile.State(position, 35);

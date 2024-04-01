@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Lightstrip extends SubsystemBase{
+public class Lightstrip extends SubsystemBase {
 
   private static final int PWM_PORT = 9;
   private static final int LENGTH = 300;
@@ -37,7 +37,7 @@ public class Lightstrip extends SubsystemBase{
 
     // Reuse buffer
     // Length is expensive to set, so only set it once, then just update data
-    this. m_ledBuffer = new AddressableLEDBuffer(LENGTH);
+    this.m_ledBuffer = new AddressableLEDBuffer(LENGTH);
     m_led.setLength(m_ledBuffer.getLength());
 
     // Set the data
@@ -74,7 +74,6 @@ public class Lightstrip extends SubsystemBase{
       //}
     }
       m_led.setData(m_ledBuffer);
-    
   }
 
 }
