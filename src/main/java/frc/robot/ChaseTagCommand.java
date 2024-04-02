@@ -3,8 +3,12 @@ package frc.robot;
 import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -37,7 +41,7 @@ public class ChaseTagCommand extends Command {
 
   private static final int TAG_TO_CHASE = 4;
   private static final Transform3d TAG_TO_GOAL = new Transform3d(
-      new Translation3d(1.5, 0.0, 0.0),
+      new Translation3d(0, 0, 0),
       new Rotation3d(0.0, 0.0, Math.PI));
 
   private final PhotonCamera photonCamera;
@@ -55,6 +59,22 @@ public class ChaseTagCommand extends Command {
   private SimpleWidget ySpeedWidget;
   private SimpleWidget oSpeedWidget;
 
+  private SimpleWidget xTargetPoseWidget;
+  private SimpleWidget yTargetPoseWidget;
+  private SimpleWidget oTargetPoseWidget;
+  private SimpleWidget xGoalPoseWidget;
+  private SimpleWidget yGoalPoseWidget;
+  private SimpleWidget rGoalPoseWidget;
+  private SimpleWidget xDrivePoseWidget;
+  private SimpleWidget yDrivePoseWidget;
+  private SimpleWidget zDrivePoseWidget;
+  private SimpleWidget vxChassisWidget;
+  private SimpleWidget vyChassisWidget;
+
+  private SimpleWidget xControllerGoalWidget;
+  private SimpleWidget yControllerGoalWidget;
+  private SimpleWidget oControllerGoalWidget;
+
   public ChaseTagCommand(
       PhotonCamera photonCamera,
       DriveSubsystem drivetrainSubsystem,
@@ -68,12 +88,39 @@ public class ChaseTagCommand extends Command {
     omegaController.setTolerance(Units.degreesToRadians(3));
     omegaController.enableContinuousInput(-Math.PI, Math.PI);
 
+    // Construct PhotonPoseEstimator: This is for field relative driving. Not used YET.
+    Transform3d robotToCam = new Transform3d( 
+      new Translation3d(0.5, 0.0, 0.5),  //TODO: Cam mounted facing forward, ? meters forward of center, ? meters right of center, ? meters up from center.
+      new Rotation3d(0,0,0));
+    PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
+        PoseStrategy.CLOSEST_TO_REFERENCE_POSE, photonCamera, robotToCam);
+
     // ShuffleBoard
     this.targetFound = Shuffleboard.getTab("chase").add("target-found", false);
     this.hasTargets = Shuffleboard.getTab("chase").add("has-targets", false);
-    this.xSpeedWidget = Shuffleboard.getTab("chase").add("speed-x", 0);
-    this.ySpeedWidget = Shuffleboard.getTab("chase").add("speed-y", 0);
-    this.oSpeedWidget = Shuffleboard.getTab("chase").add("speed-o", 0);
+
+    this.xSpeedWidget = Shuffleboard.getTab("chase").add("speed-x", 0.0);
+    this.ySpeedWidget = Shuffleboard.getTab("chase").add("speed-y", 0.0);
+    this.oSpeedWidget = Shuffleboard.getTab("chase").add("speed-o", 0.0);
+
+    this.xDrivePoseWidget = Shuffleboard.getTab("chase").add("drive-pose-x", 0.0);
+    this.yDrivePoseWidget = Shuffleboard.getTab("chase").add("drive-pose-y", 0.0);
+    this.zDrivePoseWidget = Shuffleboard.getTab("chase").add("drive-pose-z", 0.0);
+
+    this.xTargetPoseWidget = Shuffleboard.getTab("chase").add("target-pose-x", 0.0);
+    this.yTargetPoseWidget = Shuffleboard.getTab("chase").add("target-pose-y", 0.0);
+    this.oTargetPoseWidget = Shuffleboard.getTab("chase").add("target-pose-o", 0.0);
+
+    this.xGoalPoseWidget = Shuffleboard.getTab("chase").add("goal-pose-x", 0.0);
+    this.yGoalPoseWidget = Shuffleboard.getTab("chase").add("goal-pose-y", 0.0);
+    this.rGoalPoseWidget = Shuffleboard.getTab("chase").add("goal-pose-r", 0.0);
+
+    this.xControllerGoalWidget = Shuffleboard.getTab("chase").add("controller-x-atgoal", false);
+    this.yControllerGoalWidget = Shuffleboard.getTab("chase").add("controller-y-atgoal", false);
+    this.oControllerGoalWidget = Shuffleboard.getTab("chase").add("controller-o-atgoal", false);
+
+    this.vxChassisWidget = Shuffleboard.getTab("chase").add("chassis-vx", 0.0);
+    this.vyChassisWidget = Shuffleboard.getTab("chase").add("chassis-vy", 0.0);
 
     addRequirements(drivetrainSubsystem);
   }
@@ -87,6 +134,8 @@ public class ChaseTagCommand extends Command {
     yController.reset(robotPose.getY());
   }
 
+  AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+
   @Override
   public void execute() {
     var robotPose2d = poseProvider.get();
@@ -96,10 +145,12 @@ public class ChaseTagCommand extends Command {
         0.0,
         new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
 
-    // Shuffleboard.getTab("chase").add("drive-pose", robotPose2d);
+    xDrivePoseWidget.getEntry().setDouble(robotPose.getX());
+    yDrivePoseWidget.getEntry().setDouble(robotPose.getY());
+    zDrivePoseWidget.getEntry().setDouble(robotPose.getZ());
 
     var photonRes = photonCamera.getLatestResult();
-    hasTargets.getEntry("has-targets").setBoolean(photonRes.hasTargets());
+    hasTargets.getEntry().setBoolean(photonRes.hasTargets());
     if (photonRes.hasTargets()) {
       // Find the tag we want to chase
       var targetOpt = photonRes.getTargets().stream()
@@ -108,7 +159,7 @@ public class ChaseTagCommand extends Command {
           // t.getPoseAmbiguity() != -1)
           .findFirst();
 
-      targetFound.getEntry("target-found").setBoolean(targetOpt.isPresent());
+      targetFound.getEntry().setBoolean(targetOpt.isPresent());
       if (targetOpt.isPresent()) {
 
         var target = targetOpt.get();
@@ -120,19 +171,25 @@ public class ChaseTagCommand extends Command {
 
         // Trasnform the camera's pose to the target's pose
         var camToTarget = target.getBestCameraToTarget();
-        // Shuffleboard.getTab("chase").add("cam-to-target", camToTarget);
-
         var targetPose = cameraPose.transformBy(camToTarget);
-        // Shuffleboard.getTab("chase").add("target-pose", targetPose);
+        xTargetPoseWidget.getEntry().setDouble(targetPose.getX());
+        yTargetPoseWidget.getEntry().setDouble(targetPose.getY());
+        oTargetPoseWidget.getEntry().setDouble(targetPose.getZ());
 
         // Transform the tag's pose to set our goal
         var goalPose = targetPose.transformBy(TAG_TO_GOAL).toPose2d();
-        // Shuffleboard.getTab("chase").add("goal-pose", goalPose);
+        xGoalPoseWidget.getEntry().setDouble(goalPose.getX());
+        yGoalPoseWidget.getEntry().setDouble(goalPose.getY());
+        rGoalPoseWidget.getEntry().setDouble(goalPose.getRotation().getRadians());
 
         // Drive
         xController.setGoal(goalPose.getX());
         yController.setGoal(goalPose.getY());
         omegaController.setGoal(goalPose.getRotation().getRadians());
+
+        xControllerGoalWidget.getEntry().setBoolean(xController.atGoal());
+        yControllerGoalWidget.getEntry().setBoolean(yController.atGoal());
+        oControllerGoalWidget.getEntry().setBoolean(omegaController.atGoal());
       }
     }
 
@@ -156,18 +213,16 @@ public class ChaseTagCommand extends Command {
         omegaSpeed = 0;
       }
 
-      // Shuffleboard.getTab("chase").add("controller-x", xController);
-      // Shuffleboard.getTab("chase").add("controller-y", yController);
-      // Shuffleboard.getTab("chase").add("controller-o", omegaController);
-
       xSpeedWidget.getEntry("speed-x").setDouble(xSpeed);
       ySpeedWidget.getEntry("speed-y").setDouble(ySpeed);
       oSpeedWidget.getEntry("speed-o").setDouble(omegaSpeed);
 
       ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed,
           robotPose2d.getRotation());
-      // Shuffleboard.getTab("chase").add("chassis-speeds", chassisSpeeds.);
-      // drivetrainSubsystem.driveChassisSpeeds(chassisSpeeds);
+
+      vxChassisWidget.getEntry("chassis-vx").setDouble(chassisSpeeds.vxMetersPerSecond);
+      vyChassisWidget.getEntry("chassis-vy").setDouble(chassisSpeeds.vyMetersPerSecond);
+      drivetrainSubsystem.driveChassisSpeeds(chassisSpeeds);
 
     }
   }
