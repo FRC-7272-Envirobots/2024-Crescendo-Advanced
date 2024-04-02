@@ -21,8 +21,10 @@ import edu.wpi.first.wpilibj.event.EventLoop;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AprilTagPID;
 import frc.robot.commands.ArmToPosition;
 import frc.robot.commands.LightstripEnvirobots;
+import frc.robot.commands.notused.AprilTagPIDUpBack;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
@@ -35,8 +37,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
+import java.awt.Color;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
@@ -49,14 +54,14 @@ import org.photonvision.PhotonCamera;
  */
 public class RobotContainer {
         // The robot's subsystems
-        private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+        private final PhotonCamera photonCamera = new PhotonCamera("7272-limelight-1");
+        private final DriveSubsystem m_robotDrive = new DriveSubsystem(photonCamera);
         public final NoteIntakeSensor m_lightSensor = new NoteIntakeSensor();
         private final AdvancedShooterSubsystem m_shooter = new AdvancedShooterSubsystem();
         private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
         private final AdvancedArmSubsystem m_arm;
         private final Lightstrip lightstrip = new Lightstrip();
-        private final PhotonCamera photonCamera = new PhotonCamera("7272-limelight-1");
-        private final CameraOverlay cameraOverlay = new CameraOverlay();
+        // private final CameraOverlay cameraOverlay = new CameraOverlay();
 
         // The driver's controller
         XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -92,7 +97,7 @@ public class RobotContainer {
                                                                                 OIConstants.kDriveDeadband),
                                                                 -MathUtil.applyDeadband(m_driverController.getRightX(),
                                                                                 OIConstants.kDriveDeadband),
-                                                                true, true),
+                                                                true, false),
                                                 m_robotDrive));
         }
 
@@ -113,8 +118,9 @@ public class RobotContainer {
                 new JoystickButton(m_driverController, XboxController.Button.kA.value)
                                 .whileTrue(
                                                 m_intake.runIntake()
+                                                                .alongWith(lightstrip.setColorCommand(Color.RED))
                                                                 .until(m_lightSensor::isNoteCaptured)
-                                                                .andThen(lightstrip.setIntakeSuccessColor()));
+                                                                .andThen(lightstrip.flashColor(Color.WHITE, 0.1, 5.0)));
 
                 // X button = Run Shooter
                 new JoystickButton(m_driverController, XboxController.Button.kX.value)
@@ -132,6 +138,7 @@ public class RobotContainer {
                 // B button = Arm in BRAKE mode - this is the default
                 ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
                                 m_robotDrive, () -> m_robotDrive.getPose());
+
                 new JoystickButton(m_driverController, XboxController.Button.kB.value)
                                 .whileTrue(chaseTagCommand);
 
@@ -145,6 +152,18 @@ public class RobotContainer {
 
                 new JoystickButton(m_arcadeBox, 1)
                                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+
+                // // right
+                // new POVButton(m_driverController, 90).whileTrue(m_robotDrive.AprilTagSysIdDynamic(Direction.kForward));
+
+                // // left
+                // new POVButton(m_driverController, 270).whileTrue(m_robotDrive.AprilTagSysIdDynamic(Direction.kReverse));
+
+                // top
+                new POVButton(m_driverController, 0).whileTrue(new AprilTagPID(photonCamera, m_robotDrive, 1, true, false, 0, 0 ));
+
+                // bottom
+                new POVButton(m_driverController, 180).whileTrue(new AprilTagPID(photonCamera, m_robotDrive, 1, false, true, 0, 0));
 
                 // Archade Box Top Buttons
                 // Turbo/Macro/Home = Nope
