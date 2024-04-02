@@ -4,6 +4,21 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.MutableMeasure.mutable;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import org.photonvision.PhotonCamera;
+
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
+
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -12,12 +27,16 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Distance;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants.DriveConstants;
 import frc.utils.SwerveUtils;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
@@ -52,6 +71,7 @@ public class DriveSubsystem extends SubsystemBase {
   private SlewRateLimiter m_magLimiter = new SlewRateLimiter(DriveConstants.kMagnitudeSlewRate);
   private SlewRateLimiter m_rotLimiter = new SlewRateLimiter(DriveConstants.kRotationalSlewRate);
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
+  private ChassisSpeeds speeds;
 
   // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
@@ -68,6 +88,15 @@ public class DriveSubsystem extends SubsystemBase {
   );
 
   private final Field2d field2d = new Field2d();
+
+  private ChassisSpeeds chassisSpeeds;
+
+  private PhotonCamera limelight;
+
+  public DriveSubsystem(PhotonCamera limelight) {
+    super();
+    this.limelight = limelight;
+  }
 
   @Override
   public void periodic() {
@@ -120,6 +149,7 @@ public class DriveSubsystem extends SubsystemBase {
    *                      field.
    * @param rateLimit     Whether to enable rate limiting for smoother control.
    */
+
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
 
     double xSpeedCommanded;
@@ -181,6 +211,7 @@ public class DriveSubsystem extends SubsystemBase {
             Rotation2d.fromDegrees(m_gyro.getAngle()))
         : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
 
+    this.chassisSpeeds = chassisSpeeds;
     driveChassisSpeeds(chassisSpeeds);
   }
 
@@ -221,6 +252,56 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearLeft.setDesiredState(desiredStates[2]);
     m_rearRight.setDesiredState(desiredStates[3]);
   }
+
+// Creates a SysIdRoutine
+// Create a new SysId routine for characterizing the shooter.
+
+    // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
+    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
+    // Mutable holder for unit-safe linear distance values, persisted to avoid
+    // reallocation.
+    private final MutableMeasure<Distance> m_angle = mutable(Meter.of(0));
+    // Mutable holder for unit-safe linear velocity values, persisted to avoid
+    // reallocation.
+    private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
+
+    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+            // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+            new SysIdRoutine.Config(),
+            new SysIdRoutine.Mechanism(
+                    // Tell SysId how to plumb the driving voltage to the motor(s).
+                    (Measure<Voltage> volts) -> {
+                        this.drive(0, volts.in(Volts), 0, false, false);
+                    },
+                    // Tell SysId how to record a frame of data for each motor on the mechanism
+                    // being
+                    // characterized.
+                    log -> {
+                        // Record a frame for the shooter motor.
+                        log.motor("swerve-x")
+                                .voltage(m_appliedVoltage.mut_replace(chassisSpeeds.vxMetersPerSecond
+                                        * RobotController.getBatteryVoltage(), Volts))
+                                  //       .angularPosition(
+                                  //         m_angle.mut_replace(left_motor.getPosition().getValueAsDouble(), Rotations))
+                                  // .angularVelocity(m_velocity.mut_replace(
+                                  //         left_motor.getRotorVelocity().getValueAsDouble(), RotationsPerSecond));
+                                .linearPosition(
+                                        m_angle.mut_replace(this.limelight.getLatestResult().getBestTarget().getYaw(), Meter))
+                                .linearVelocity(m_velocity.mut_replace(chassisSpeeds.vxMetersPerSecond, MetersPerSecond));
+                    },
+                    // Tell SysId to make generated commands require this subsystem, suffix test
+                    // state in
+                    // WPILog with this subsystem's name ("shooter")
+                    this));
+
+
+public Command AprilTagSysIdQuasistatic(SysIdRoutine.Direction direction) {
+  return m_sysIdRoutine.quasistatic(direction);
+}
+
+public Command AprilTagSysIdDynamic(SysIdRoutine.Direction direction) {
+  return m_sysIdRoutine.dynamic(direction);
+}
 
   // /** Resets the drive encoders to currently read a position of 0. */
   // public void resetEncoders() {
