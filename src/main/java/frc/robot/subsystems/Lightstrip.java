@@ -49,8 +49,21 @@ public class Lightstrip extends SubsystemBase {
     this.setColor(Color.GREEN);
   }
 
+  public Command flashColor(Color color, double seconds, double duration) {
+    timer.reset();
+    timer.start();
+    return run(() -> {
+      if (timer.get() % seconds < 0.01) {
+        setColor(color);
+      } else {
+        setColor(Color.BLACK);
+      }
+    }).withTimeout(duration);
+  }
+
+
   public Command setIntakeSuccessColor() {
-    return runOnce(() -> setColor(Color.ORANGE));
+    return run(() -> setColor(Color.WHITE)).withTimeout(5);
   }
 
   public void setShootCompletedColor() {
@@ -71,6 +84,10 @@ public class Lightstrip extends SubsystemBase {
       }
     }
     m_led.setData(m_ledBuffer);
+  }
+
+  public Command setColorCommand(Color color) {
+    return run(() -> setColor(color));
   }
 
   public void setColor(Color color) {

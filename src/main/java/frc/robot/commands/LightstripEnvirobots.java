@@ -31,7 +31,7 @@ public class LightstripEnvirobots extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    System.out.println(timer.get());
+    //System.out.println(timer.get());
     if((Math.round(timer.get()) % 2) == 0){
       lightstrip.setColor(Color.BLUE);
     } else {
