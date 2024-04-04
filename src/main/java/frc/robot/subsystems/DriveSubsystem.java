@@ -37,7 +37,7 @@ import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import com.kauailabs.navx.frc.AHRS;
+//import com.kauailabs.navx.frc.AHRS;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
@@ -63,14 +63,14 @@ public class DriveSubsystem extends SubsystemBase {
 
   // The gyro sensor
   // private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
-  private AHRS ahrs = new AHRS(); /* Alternatives:  SPI.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
+  //private AHRS ahrs = new AHRS(); /* Alternatives:  SPI.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
 
   private double getGyroAngle() {
     // making a function for this so we can change the type of gyro more easily
 
     // must return the angle about the Yaw axis, CCW positive. 
     // Unclear if it's supposed to wrap or not.
-    return ahrs.getAngle();
+    return 0.0; //ahrs.getAngle();
   }
 
   // Slew rate filter variables for controlling lateral acceleration

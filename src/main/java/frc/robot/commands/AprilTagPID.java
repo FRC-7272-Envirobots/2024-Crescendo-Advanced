@@ -41,10 +41,10 @@ public class AprilTagPID extends Command {
     this.doY = doY;
     this.targetTagArea = targetTagArea;
     this.targetTagYaw = targetTagYaw;
-    yawWidget = Shuffleboard.getTab("AptrilTagPID").add("yaw", 0.0);
-    areaWidget = Shuffleboard.getTab("AptrilTagPID").add("area", 0.0);
-    xSpeedWidget = Shuffleboard.getTab("AptrilTagPID").add("xspeed", 0.0);
-    ySpeedWidget = Shuffleboard.getTab("AptrilTagPID").add("yspeed", 0.0);
+    // yawWidget = Shuffleboard.getTab("AptrilTagPID").add("yaw", 0.0);
+    // areaWidget = Shuffleboard.getTab("AptrilTagPID").add("area", 0.0);
+    // xSpeedWidget = Shuffleboard.getTab("AptrilTagPID").add("xspeed", 0.0);
+    // ySpeedWidget = Shuffleboard.getTab("AptrilTagPID").add("yspeed", 0.0);
 
     addRequirements(drivetrainSubsystem);
   }

@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,11 +33,18 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     TalonFXConfiguration config;
     Follower right_arm_follower;
 
-    private DutyCycleEncoder armEncoder;
+    //private DutyCycleEncoder armEncoder;
+
+    DigitalInput limitSwitch1;
+    DigitalInput limitSwitch2;
+
 
     public AdvancedArmSubsystem() {
         super();
         setName("arm");
+
+        limitSwitch1 = new DigitalInput(7);
+        limitSwitch2 = new DigitalInput(8);
 
         // Arm motion logic
         config = new TalonFXConfiguration();
@@ -67,7 +75,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
         right_arm_motor.setControl(right_arm_follower);
 
-        armEncoder = new DutyCycleEncoder(8);
+        //armEncoder = new DutyCycleEncoder(8);
 
         /* Speed up signals for better charaterization data */
         BaseStatusSignal.setUpdateFrequencyForAll(250,
@@ -79,7 +87,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
          * Optimize out the other signals, since they're not particularly helpful for us
          */
         left_arm_motor.optimizeBusUtilization();
-        SignalLogger.start();
     }
 
     public Command moveArmUpCommand() {
@@ -95,7 +102,11 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public Command moveArmDownCommand() {
         return Commands.startEnd(
                 () -> {
-                    left_arm_motor.set(move_down_pct_power);
+                    if(!endstopTriggered()) {
+                        left_arm_motor.set(move_down_pct_power);
+                    } else {
+                        left_arm_motor.set(hold_position_pct_power);
+                    }
                 },
                 () -> {
                     left_arm_motor.set(hold_position_pct_power);
@@ -114,13 +125,17 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         });
     }
 
-    public double getEncoderReading() {
-        return armEncoder.getPositionOffset();
+    public boolean endstopTriggered() {
+        return limitSwitch1.get() || limitSwitch2.get();
     }
 
-    public void resetEncoder() {
-        armEncoder.reset();
-    }
+    // public double getEncoderReading() {
+    //     return armEncoder.getPositionOffset();
+    // }
+
+    // public void resetEncoder() {
+    //     armEncoder.reset();
+    // }
 
     public void moveArm(double pct_power) {
         left_arm_motor.set(pct_power);
@@ -138,6 +153,8 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         return left_arm_motor.getVelocity().getValueAsDouble();
     }
 
+
+    
     private final VoltageOut m_sysidControl = new VoltageOut(0);
     private SysIdRoutine m_SysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
@@ -158,7 +175,10 @@ public class AdvancedArmSubsystem extends SubsystemBase {
      * @param direction The direction (forward or reverse) to run the test in
      */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+                SignalLogger.start();
+
         return m_SysIdRoutine.quasistatic(direction);
+        // SignalLogger.stop();
     }
 
     /**
@@ -167,6 +187,9 @@ public class AdvancedArmSubsystem extends SubsystemBase {
      * @param direction The direction (forward or reverse) to run the test in
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+                SignalLogger.start();
+
         return m_SysIdRoutine.dynamic(direction);
+        // SignalLogger.stop();
     }
 }
