@@ -5,22 +5,27 @@
 package frc.robot.commands;
 
 import java.awt.Color;
+import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
+import frc.robot.subsystems.AdvancedShooterSubsystem;
 import frc.robot.subsystems.Lightstrip;
 import frc.robot.subsystems.NoteIntakeSensor;
 
 /** Add your docs here. */
 public class Routines {
     private AdvancedArmSubsystem arm;
-    private AdvancedIntakeSubsystem shooter;
+    private AdvancedShooterSubsystem shooter;
     private AdvancedIntakeSubsystem intake;
     private Lightstrip lightstrip;
     private NoteIntakeSensor intakeSensor;
 
-    public Routines(AdvancedArmSubsystem arm, AdvancedIntakeSubsystem shooter, AdvancedIntakeSubsystem intake,
+    public Routines(AdvancedArmSubsystem arm, AdvancedShooterSubsystem shooter, AdvancedIntakeSubsystem intake,
             Lightstrip lightstrip, NoteIntakeSensor intakeSensor) {
         this.arm = arm;
         this.shooter = shooter;
@@ -34,5 +39,20 @@ public class Routines {
                 .alongWith(lightstrip.setColorCommand(Color.RED))
                 .until(intakeSensor::isNoteCaptured)
                 .andThen(lightstrip.flashColor(Color.WHITE, 0.1, 5.0));
+    }
+
+    public Command shootRoutine() {
+        return Commands.parallel(
+                shooter.runShooter(Optional.empty()),
+                Commands.sequence(
+                                Commands.waitSeconds(.2),
+                                intake.runIntake(),
+                                new StartEndCommand(
+                                                () -> {
+                                                        lightstrip.setShootCompletedColor();
+                                                },
+                                                () -> {
+                                                }),
+                                new WaitCommand(5)));
     }
 }

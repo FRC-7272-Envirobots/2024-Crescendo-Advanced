@@ -67,7 +67,7 @@ public class Lightstrip extends SubsystemBase {
   }
 
   public void setShootCompletedColor() {
-    setColor(Color.GREEN);
+    setColor(Color.ORANGE);
   }
 
   public void lightSidesTest() {
