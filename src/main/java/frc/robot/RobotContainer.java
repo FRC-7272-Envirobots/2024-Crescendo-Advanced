@@ -68,7 +68,7 @@ public class RobotContainer {
         private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
         private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
         private final Lightstrip lightstrip = new Lightstrip();
-        private final Routines routines = new Routines(m_arm, m_shooter, m_intake, lightstrip, m_lightSensor);
+        private final Routines routines = new Routines(m_arm, m_shooter, m_intake, lightstrip, m_lightSensor, m_robotDrive);
         // private final CameraOverlay cameraOverlay = new CameraOverlay();
 
         // The driver's controller
@@ -127,6 +127,7 @@ public class RobotContainer {
                 new JoystickButton(m_driverController, XboxController.Button.kY.value)
                                 .whileTrue(routines.shootRoutine(.1));
 
+<<<<<<< HEAD
 
                 new JoystickButton(m_driverController, XboxController.Button.kB.value)
                                 .whileTrue(m_intake.runOuttake());
@@ -136,7 +137,16 @@ public class RobotContainer {
 
                 // new JoystickButton(m_driverController, XboxController.Button.kB.value)
                 //                 .whileTrue(chaseTagCommand);
+=======
+                // B button = Arm in BRAKE mode - this is the default
+                // ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
+                //                 m_robotDrive, () -> m_robotDrive.getPose());
+>>>>>>> 014f7a1bacbaa74f06e2fadb4d353eae2fd9088c
 
+                // new JoystickButton(m_driverController, XboxController.Button.kB.value)
+                //                 .whileTrue(chaseTagCommand);
+                // new JoystickButton(m_driverController, XboxController.Button.kB.value)
+                //                 .whileTrue(chaseTagCommand);
                 // R1 / RB button - Arm moves up
                 new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
                                 .whileTrue(m_arm.moveArmUpCommand());
@@ -221,8 +231,8 @@ public class RobotContainer {
                 new JoystickButton(m_arcadeBox, 4)
                                 .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
                 // // Hold (B) = Button 2
-                // new JoystickButton(m_arcadeBox, 2)
-                //                 .whileTrue(new ArmToPosition(m_arm, restingPosition, true));
+                new JoystickButton(m_arcadeBox, 2)
+                                .whileTrue(routines.resetHeading());
 
                 // Tap (R1/RB) = Button 6
                 new JoystickButton(m_arcadeBox, 6)

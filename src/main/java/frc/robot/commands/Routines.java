@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Lightstrip;
 import frc.robot.subsystems.NoteIntakeSensor;
 
@@ -24,14 +25,16 @@ public class Routines {
     private AdvancedIntakeSubsystem intake;
     private Lightstrip lightstrip;
     private NoteIntakeSensor intakeSensor;
+    private DriveSubsystem drive;
 
     public Routines(AdvancedArmSubsystem arm, AdvancedShooterSubsystem shooter, AdvancedIntakeSubsystem intake,
-            Lightstrip lightstrip, NoteIntakeSensor intakeSensor) {
+            Lightstrip lightstrip, NoteIntakeSensor intakeSensor, DriveSubsystem drive) {
         this.arm = arm;
         this.shooter = shooter;
         this.intake = intake;
         this.lightstrip = lightstrip;
         this.intakeSensor = intakeSensor;
+        this.drive = drive;
     }
 
     public Command intakeRoutine() {
@@ -54,5 +57,9 @@ public class Routines {
                                                 () -> {
                                                 }),
                                 new WaitCommand(5)));
+    }
+
+    public Command resetHeading() {
+       return Commands.run(() -> {this.drive.resetGyroAngle();}, drive);
     }
 }
