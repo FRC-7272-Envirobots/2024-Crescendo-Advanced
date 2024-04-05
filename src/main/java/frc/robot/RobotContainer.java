@@ -127,12 +127,15 @@ public class RobotContainer {
                 new JoystickButton(m_driverController, XboxController.Button.kY.value)
                                 .whileTrue(routines.shootRoutine(.1));
 
-                // B button = Arm in BRAKE mode - this is the default
-                ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
-                                m_robotDrive, () -> m_robotDrive.getPose());
 
                 new JoystickButton(m_driverController, XboxController.Button.kB.value)
-                                .whileTrue(chaseTagCommand);
+                                .whileTrue(m_intake.runOuttake());
+                // B button = Arm in BRAKE mode - this is the default
+                // ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
+                //                 m_robotDrive, () -> m_robotDrive.getPose());
+
+                // new JoystickButton(m_driverController, XboxController.Button.kB.value)
+                //                 .whileTrue(chaseTagCommand);
 
                 // R1 / RB button - Arm moves up
                 new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)

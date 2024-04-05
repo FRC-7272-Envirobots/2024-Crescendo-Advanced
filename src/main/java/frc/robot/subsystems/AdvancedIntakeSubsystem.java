@@ -21,4 +21,11 @@ public class AdvancedIntakeSubsystem extends SubsystemBase {
                 () -> intake_motor.set(0),
                 this);
     }
+
+    public Command runOuttake() {
+                return Commands.startEnd(
+                () -> intake_motor.set(-.50),
+                () -> intake_motor.set(0),
+                this);
+    }
 }
