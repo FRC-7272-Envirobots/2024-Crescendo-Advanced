@@ -39,9 +39,10 @@ public class NoteIntakeSensor extends SubsystemBase {
    */
   public boolean isNoteCaptured() {
     int proximity = m_colorSensor.getProximity();
+    System.out.println(proximity);
     Color detectedColor = m_colorSensor.getColor();
     ColorMatchResult match = m_colorMatcher.matchColor(detectedColor);
-    boolean result = match != null && match.color == kNoteTarget && proximity > proximityThreshold;
+    boolean result = match != null && match.color == kNoteTarget; //|| proximity > proximityThreshold;
     return result;
   }
 

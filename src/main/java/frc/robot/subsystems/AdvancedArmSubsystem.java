@@ -14,16 +14,20 @@ import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
+import com.ctre.phoenix6.signals.ReverseLimitTypeValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -31,6 +35,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public static double move_up_pct_power = 0.4;
     public static double move_down_pct_power = -0.4;
     public static double hold_position_pct_power = 0;
+    public double speakerPosition = Constants.ArmConstants.speakerPosition;
 
     private final TalonFX left_arm_motor = new TalonFX(12);
     private final TalonFX right_arm_motor = new TalonFX(11);
@@ -38,14 +43,13 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     TalonFXConfiguration config;
     Follower right_arm_follower;
 
-    //private DutyCycleEncoder armEncoder;
-
     DigitalInput limitSwitch1;
     DigitalInput limitSwitch2;
 
 
     public AdvancedArmSubsystem() {
         super();
+        this.speakerPosition = SmartDashboard.getNumber("speakerPosition", Constants.ArmConstants.speakerPosition);
         setName("arm");
 
         limitSwitch1 = new DigitalInput(7);
@@ -62,14 +66,14 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         config.Slot0.kA = 0.00085311;
 
         //Limit Switch
-        config.HardwareLimitSwitch.ForwardLimitEnable = true;
-        config.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable=true;
-        config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
-        config.HardwareLimitSwitch.ForwardLimitType = ForwardLimitTypeValue.NormallyOpen;
+        config.HardwareLimitSwitch.ReverseLimitEnable = true;
+        config.HardwareLimitSwitch.ReverseLimitAutosetPositionEnable=true;
+        config.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.LimitSwitchPin;
+        config.HardwareLimitSwitch.ReverseLimitType = ReverseLimitTypeValue.NormallyOpen;
 
-        config.HardwareLimitSwitch.ReverseLimitEnable = false;
-        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 60.0; //TOD: CHANGE THIS TO CORRECT VALUE
+        config.HardwareLimitSwitch.ForwardLimitEnable = false;
+        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 82.0; //TOD: CHANGE THIS TO CORRECT VALUE
 
         config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         config.Slot0.kG = 0.15387;
@@ -86,8 +90,10 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         // reset relative position of motor to zero.
         // Robot MUST be in start position when robot is turned on, or press the reset button on roborio.
         left_arm_motor.setPosition(0);
+        left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
 
         right_arm_follower = new Follower(left_arm_motor.getDeviceID(), true);
+        right_arm_motor.setNeutralMode(NeutralModeValue.Brake);
         right_arm_motor.setControl(right_arm_follower);
 
         //armEncoder = new DutyCycleEncoder(8);
@@ -107,9 +113,11 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public Command moveArmUpCommand() {
         return Commands.startEnd(
                 () -> {
+                    System.out.println("moving up");
                     left_arm_motor.set(move_up_pct_power);
                 },
                 () -> {
+                    System.out.println("moving stopped");
                     left_arm_motor.set(hold_position_pct_power);
                 }, this);
     }
@@ -117,11 +125,11 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public Command moveArmDownCommand() {
         return Commands.startEnd(
                 () -> {
-                    if(!endstopTriggered()) {
+                    // if(!endstopTriggered()) {
                         left_arm_motor.set(move_down_pct_power);
-                    } else {
-                        left_arm_motor.set(hold_position_pct_power);
-                    }
+                    // } else {
+                    //     left_arm_motor.set(hold_position_pct_power);
+                    // }
                 },
                 () -> {
                     left_arm_motor.set(hold_position_pct_power);
@@ -140,9 +148,9 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         });
     }
 
-    public boolean endstopTriggered() {
-        return limitSwitch1.get() || limitSwitch2.get();
-    }
+    // public boolean endstopTriggered() {
+    //     return limitSwitch1.get() || limitSwitch2.get();
+    // }
 
     // public double getEncoderReading() {
     //     return armEncoder.getPositionOffset();
@@ -214,5 +222,9 @@ public class AdvancedArmSubsystem extends SubsystemBase {
 
         return m_SysIdRoutine.dynamic(direction);
         // SignalLogger.stop();
+    }
+
+    public void resetPosition() {
+        left_arm_motor.setPosition(0);
     }
 }

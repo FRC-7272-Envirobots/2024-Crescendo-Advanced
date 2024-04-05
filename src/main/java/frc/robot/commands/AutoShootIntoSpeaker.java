@@ -9,6 +9,7 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.AdvancedArmSubsystem;
@@ -19,18 +20,21 @@ import frc.robot.subsystems.AdvancedShooterSubsystem;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AutoShootIntoSpeaker extends SequentialCommandGroup {
   /** Creates a new AutoShootIntoSpeaker. */
-  public AutoShootIntoSpeaker(AdvancedArmSubsystem arm, AdvancedShooterSubsystem shooter) {
+  public AutoShootIntoSpeaker(AdvancedArmSubsystem arm, AdvancedShooterSubsystem shooter, Routines routines) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
 
-    BooleanSupplier armAtSpeakerPosition = () -> arm.getPosition() == Constants.ArmConstants.speakerPosition;
+    //BooleanSupplier armAtSpeakerPosition = () -> arm.getPosition() == Constants.ArmConstants.speakerPosition;
 
     addCommands(
         new ResetArmPosition(arm),
-        new ParallelCommandGroup(
-            new ArmToPosition(arm, Constants.ArmConstants.speakerPosition, true),
-            new SequentialCommandGroup(
-                new WaitUntilCommand(armAtSpeakerPosition),
-                shooter.runShooter(Optional.of(5)))));
+        new WaitCommand(1),
+        new ArmToPosition(arm, Constants.ArmConstants.speakerPosition, false),
+        new WaitCommand(1),
+            // new SequentialCommandGroup(
+            //     new WaitUntilCommand(armAtSpeakerPosition),
+        routines.shootRoutine(.6 ).withTimeout(2));
+            
+                // );
   }
 }

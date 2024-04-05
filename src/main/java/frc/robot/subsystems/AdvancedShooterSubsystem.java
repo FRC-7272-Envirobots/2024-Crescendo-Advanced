@@ -6,9 +6,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class AdvancedShooterSubsystem extends SubsystemBase {
 
@@ -21,11 +19,10 @@ public class AdvancedShooterSubsystem extends SubsystemBase {
         shooter_bot_motor.setInverted(false);
     }
 
-    public Command runShooter(Optional<Integer> seconds) {
+    public Command runShooter(double speed, Optional<Integer> seconds) {
 
         Command shoot = Commands.startEnd(
                 () -> {
-                    double speed = 0.6;
                     // shooter_top_motor.set(speed);
                     shooter_bot_motor.set(speed);
                     shooter_top_motor.set(speed);
@@ -37,12 +34,10 @@ public class AdvancedShooterSubsystem extends SubsystemBase {
                 },
                 this);
 
-        if (seconds.isEmpty()) {
-            return shoot;
+        if (!seconds.isEmpty()) {
+            return shoot.withTimeout(seconds.get());
         }
 
-        return new ParallelCommandGroup(
-                shoot,
-                new WaitCommand(seconds.get()));
+        return shoot;
     }
 }

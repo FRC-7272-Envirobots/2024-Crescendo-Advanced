@@ -41,9 +41,9 @@ public class Routines {
                 .andThen(lightstrip.flashColor(Color.WHITE, 0.1, 5.0));
     }
 
-    public Command shootRoutine() {
+    public Command shootRoutine(double speed) {
         return Commands.parallel(
-                shooter.runShooter(Optional.empty()),
+                shooter.runShooter(speed, Optional.empty()),
                 Commands.sequence(
                                 Commands.waitSeconds(.2),
                                 intake.runIntake(),

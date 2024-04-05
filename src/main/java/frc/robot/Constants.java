@@ -122,9 +122,10 @@ public final class Constants {
   }
 
   public static final class ArmConstants {
-    public static final double intakePosition = 0.0;
-    public static final double speakerPosition = 0.0; // TODO
-    public static final double ampPosition = 0.0; // TODO
+    public static final double intakePosition = -10.0; 
+    public static final double speakerPosition = 13.25;
+    public static final double ampPosition = 78;
+    public static final double restingPosition = 60;
   }
 
   public static final class AutoConstants {

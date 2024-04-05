@@ -31,11 +31,16 @@ public class ResetArmPosition extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    System.out.println("ended");
+    arm.moveArm(0);
+    arm.resetPosition();
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return arm.forwardLimitSwitched();
+    System.out.println(arm.reverseLimitSwitched());
+    return arm.reverseLimitSwitched();
   }
 }

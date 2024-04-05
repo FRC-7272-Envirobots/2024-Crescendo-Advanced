@@ -97,15 +97,12 @@ public class RobotContainer {
                                 // Turning is controlled by the X axis of the right stick.
                                 new RunCommand(
                                                 () -> m_robotDrive.drive(
-                                                                -m_driverController.getLeftY(),
-                                                                -m_driverController.getLeftY(),
-                                                                -m_driverController.getRightX(),
-                                                                // -MathUtil.applyDeadband(m_driverController.getLeftY(),
-                                                                // OIConstants.kDriveDeadband),
-                                                                // -MathUtil.applyDeadband(m_driverController.getLeftX(),
-                                                                // OIConstants.kDriveDeadband),
-                                                                // -MathUtil.applyDeadband(m_driverController.getRightX(),
-                                                                // OIConstants.kDriveDeadband),
+                                                                -MathUtil.applyDeadband(m_driverController.getLeftY(),
+                                                                OIConstants.kDriveDeadband),
+                                                                -MathUtil.applyDeadband(m_driverController.getLeftX(),
+                                                                OIConstants.kDriveDeadband),
+                                                                -MathUtil.applyDeadband(m_driverController.getRightX(),
+                                                                OIConstants.kDriveDeadband),
                                                                 true, false),
                                                 m_robotDrive));
         }
@@ -122,9 +119,13 @@ public class RobotContainer {
                 new JoystickButton(m_driverController, XboxController.Button.kA.value)
                                 .whileTrue(routines.intakeRoutine());
 
-                // X button = Run Shooter
+                // X button = Run Shooter for speaker
                 new JoystickButton(m_driverController, XboxController.Button.kX.value)
-                                .whileTrue(routines.shootRoutine());
+                                .whileTrue(routines.shootRoutine(.6));
+
+                // Y button = Run Shooter for amp
+                new JoystickButton(m_driverController, XboxController.Button.kY.value)
+                                .whileTrue(routines.shootRoutine(.1));
 
                 // B button = Arm in BRAKE mode - this is the default
                 ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
@@ -196,41 +197,37 @@ public class RobotContainer {
 
 
                 // Intake angle
-                double intakePosition = -66;
                 // Tap (L1/LB) = Button 5
                 new JoystickButton(m_arcadeBox, 5)
                                 .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.intakePosition, true));
                 // Hold (L2/LT) = Axis 2
-                m_arcadeBox.axisGreaterThan(2, 0.0, m_loop)
-                                .ifHigh(() -> new ArmToPosition(m_arm,  Constants.ArmConstants.intakePosition, true));
+                // m_arcadeBox.axisGreaterThan(2, 0.5, m_loop)
+                //                 .ifHigh(() -> new ArmToPosition(m_arm,  Constants.ArmConstants.intakePosition, true));
 
                 // Shooting angle
-                double shootingPosition = -28.0;
                 // Tap (X) = Button 3
                 new JoystickButton(m_arcadeBox, 3)
                                 .onTrue(new ArmToPosition(m_arm,  Constants.ArmConstants.speakerPosition, true));
                 // Hold (A) = Button 1
-                new JoystickButton(m_arcadeBox, 1)
-                                .whileTrue(new ArmToPosition(m_arm, Constants.ArmConstants.speakerPosition, true));
+                // new JoystickButton(m_arcadeBox, 1)
+                //                 .whileTrue(new ArmToPosition(m_arm, Constants.ArmConstants.speakerPosition, true));
 
                 // // Resting angle
                 // double restingPosition = 0.0;
                 // // Tap (Y) = Button 4
-                // new JoystickButton(m_arcadeBox, 4)
-                //                 .onTrue(new ArmToPosition(m_arm, restingPosition, true));
+                new JoystickButton(m_arcadeBox, 4)
+                                .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
                 // // Hold (B) = Button 2
                 // new JoystickButton(m_arcadeBox, 2)
                 //                 .whileTrue(new ArmToPosition(m_arm, restingPosition, true));
 
-                double ampPosition = 10.0;
-
                 // Tap (R1/RB) = Button 6
                 new JoystickButton(m_arcadeBox, 6)
-                                .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
+                                .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.restingPosition, true));
 
-                // Hold (R2/RT) = Axis 3
-                m_arcadeBox.axisGreaterThan(3, 0.5, m_loop)
-                                .ifHigh(() -> new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
+                // // Hold (R2/RT) = Axis 3
+                // m_arcadeBox.axisGreaterThan(3, 0.5, m_loop)
+                //                 .ifHigh(() -> new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
         }
 
         /**
@@ -278,8 +275,8 @@ public class RobotContainer {
                                                 m_robotDrive::setModuleStates,
                                                 m_robotDrive).andThen(() -> m_robotDrive.drive(0, 0, 0, false, false)));
 
-                routine.addOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter));
-
+                routine.addOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines));
+                routine.setDefaultOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines));
                 return routine.getSelected();
         }
 }
