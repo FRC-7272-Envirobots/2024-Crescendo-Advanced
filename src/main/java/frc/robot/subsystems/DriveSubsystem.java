@@ -63,7 +63,11 @@ public class DriveSubsystem extends SubsystemBase {
   private double getGyroAngle() {
     // making a function for this so we can change the type of gyro more easily
 
-    return gyro.getAngle();
+    return -gyro.getAngle();
+  }
+
+  public void resetGyroAngle() {
+    gyro.reset();
   }
 
   private ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);

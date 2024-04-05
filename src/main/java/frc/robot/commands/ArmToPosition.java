@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,7 +17,9 @@ public class ArmToPosition extends Command {
   private boolean continuous;
 
   // class member variable
-  final PositionVoltage m_position = new PositionVoltage(0);
+  final MotionMagicVoltage m_position = new MotionMagicVoltage(0); // new PositionVoltage(0);
+  // final MotionMagicVoltage m_magic = new MotionMagicVoltage(0;)
+  // final trapa
 
   /** Creates a new ArmToShooterAngle. */
   public ArmToPosition(AdvancedArmSubsystem arm, double position, boolean continuous) {
@@ -39,7 +42,7 @@ public class ArmToPosition extends Command {
     System.out.println("exec");
     m_position.Slot = 0;
     m_position.Position = position;
-    m_position.Velocity = 35;
+    //m_position.Velocity = 35;
     arm.setControl(m_position);
     // System.out.println("arm curr position: " + arm.getPosition());
     // System.out.println("arm curr velocity: " + arm.getVelocity());
