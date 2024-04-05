@@ -18,12 +18,16 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.event.EventLoop;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AprilTagPID;
 import frc.robot.commands.ArmToPosition;
+import frc.robot.commands.AutoShootIntoSpeaker;
+import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.LightstripEnvirobots;
+import frc.robot.commands.Routines;
 import frc.robot.commands.notused.AprilTagPIDUpBack;
 import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedIntakeSubsystem;
@@ -43,6 +47,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
 
@@ -59,8 +64,9 @@ public class RobotContainer {
         public final NoteIntakeSensor m_lightSensor = new NoteIntakeSensor();
         private final AdvancedShooterSubsystem m_shooter = new AdvancedShooterSubsystem();
         private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
-        private final AdvancedArmSubsystem m_arm;
+        private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
         private final Lightstrip lightstrip = new Lightstrip();
+        private final Routines routines = new Routines(m_arm, m_intake, m_intake, lightstrip, m_lightSensor);
         // private final CameraOverlay cameraOverlay = new CameraOverlay();
 
         // The driver's controller
@@ -71,9 +77,6 @@ public class RobotContainer {
          * The container for the robot. Contains subsystems, OI devices, and commands.
          */
         public RobotContainer() {
-
-                this.m_arm = new AdvancedArmSubsystem();
-
                 // Configure the button bindings
                 configureButtonBindings();
 
@@ -91,12 +94,15 @@ public class RobotContainer {
                                 // Turning is controlled by the X axis of the right stick.
                                 new RunCommand(
                                                 () -> m_robotDrive.drive(
-                                                                -MathUtil.applyDeadband(m_driverController.getLeftY(),
-                                                                                OIConstants.kDriveDeadband),
-                                                                -MathUtil.applyDeadband(m_driverController.getLeftX(),
-                                                                                OIConstants.kDriveDeadband),
-                                                                -MathUtil.applyDeadband(m_driverController.getRightX(),
-                                                                                OIConstants.kDriveDeadband),
+                                                                -m_driverController.getLeftY(),
+                                                                -m_driverController.getLeftY(),
+                                                                -m_driverController.getRightX(),
+                                                                // -MathUtil.applyDeadband(m_driverController.getLeftY(),
+                                                                //                 OIConstants.kDriveDeadband),
+                                                                // -MathUtil.applyDeadband(m_driverController.getLeftX(),
+                                                                //                 OIConstants.kDriveDeadband),
+                                                                // -MathUtil.applyDeadband(m_driverController.getRightX(),
+                                                                //                 OIConstants.kDriveDeadband),
                                                                 true, false),
                                                 m_robotDrive));
         }
@@ -116,16 +122,12 @@ public class RobotContainer {
 
                 // A button = Run Intake
                 new JoystickButton(m_driverController, XboxController.Button.kA.value)
-                                .whileTrue(
-                                                m_intake.runIntake()
-                                                                .alongWith(lightstrip.setColorCommand(Color.RED))
-                                                                .until(m_lightSensor::isNoteCaptured)
-                                                                .andThen(lightstrip.flashColor(Color.WHITE, 0.1, 5.0)));
-
+                                .whileTrue(routines.intakeRoutine());
+ 
                 // X button = Run Shooter
                 new JoystickButton(m_driverController, XboxController.Button.kX.value)
                                 .whileTrue(Commands.parallel(
-                                                m_shooter.runShooter(),
+                                                m_shooter.runShooter(Optional.empty()),
                                                 Commands.sequence(
                                                                 Commands.waitSeconds(.2),
                                                                 m_intake.runIntake()))
@@ -154,16 +156,20 @@ public class RobotContainer {
                                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
 
                 // // right
-                // new POVButton(m_driverController, 90).whileTrue(m_robotDrive.AprilTagSysIdDynamic(Direction.kForward));
+                // new POVButton(m_driverController,
+                // 90).whileTrue(m_robotDrive.AprilTagSysIdDynamic(Direction.kForward));
 
                 // // left
-                // new POVButton(m_driverController, 270).whileTrue(m_robotDrive.AprilTagSysIdDynamic(Direction.kReverse));
+                // new POVButton(m_driverController,
+                // 270).whileTrue(m_robotDrive.AprilTagSysIdDynamic(Direction.kReverse));
 
                 // top
-                new POVButton(m_driverController, 0).whileTrue(new AprilTagPID(photonCamera, m_robotDrive, 1, true, false, 0, 0 ));
+                new POVButton(m_driverController, 0)
+                                .whileTrue(new AprilTagPID(photonCamera, m_robotDrive, 1, true, false, 0, 0));
 
                 // bottom
-                new POVButton(m_driverController, 180).whileTrue(new AprilTagPID(photonCamera, m_robotDrive, 1, false, true, 0, 0));
+                new POVButton(m_driverController, 180)
+                                .whileTrue(new AprilTagPID(photonCamera, m_robotDrive, 1, false, true, 0, 0));
 
                 // Archade Box Top Buttons
                 // Turbo/Macro/Home = Nope
@@ -242,6 +248,7 @@ public class RobotContainer {
          * @return the command to run in autonomous
          */
         public Command getAutonomousCommand() {
+
                 // Create config for trajectory
                 TrajectoryConfig config = new TrajectoryConfig(
                                 AutoConstants.kMaxSpeedMetersPerSecond,
@@ -263,22 +270,25 @@ public class RobotContainer {
                                 AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
                 thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-                SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-                                exampleTrajectory,
-                                m_robotDrive::getPose, // Functional interface to feed supplier
-                                DriveConstants.kDriveKinematics,
-
-                                // Position controllers
-                                new PIDController(AutoConstants.kPXController, 0, 0),
-                                new PIDController(AutoConstants.kPYController, 0, 0),
-                                thetaController,
-                                m_robotDrive::setModuleStates,
-                                m_robotDrive);
-
                 // Reset odometry to the starting pose of the trajectory.
                 m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
 
-                // Run path following command, then stop at the end.
-                return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+                SendableChooser<Command> routine = new SendableChooser<Command>();
+                routine.addOption("SwerveTrajectory",
+                                new SwerveControllerCommand(
+                                                exampleTrajectory,
+                                                m_robotDrive::getPose, // Functional interface to feed supplier
+                                                DriveConstants.kDriveKinematics,
+
+                                                // Position controllers
+                                                new PIDController(AutoConstants.kPXController, 0, 0),
+                                                new PIDController(AutoConstants.kPYController, 0, 0),
+                                                thetaController,
+                                                m_robotDrive::setModuleStates,
+                                                m_robotDrive).andThen(() -> m_robotDrive.drive(0, 0, 0, false, false)));
+
+                routine.addOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter));
+
+                return routine.getSelected();
         }
 }

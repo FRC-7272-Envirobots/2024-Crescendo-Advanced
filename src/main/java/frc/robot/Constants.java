@@ -121,6 +121,12 @@ public final class Constants {
     public static final double kDriveDeadband = 0.05;
   }
 
+  public static final class ArmConstants {
+    public static final double intakePosition = 0.0;
+    public static final double speakerPosition = 0.0; // TODO
+    public static final double ampPosition = 0.0; // TODO
+  }
+
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;

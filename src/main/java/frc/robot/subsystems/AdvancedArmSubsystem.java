@@ -3,13 +3,18 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
+import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
+import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.ReverseLimitValue;
 
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
@@ -23,9 +28,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static edu.wpi.first.units.Units.Volts;
 
 public class AdvancedArmSubsystem extends SubsystemBase {
-    private static double move_up_pct_power = 0.4;
-    private static double move_down_pct_power = -0.4;
-    private static double hold_position_pct_power = 0;
+    public static double move_up_pct_power = 0.4;
+    public static double move_down_pct_power = -0.4;
+    public static double hold_position_pct_power = 0;
 
     private final TalonFX left_arm_motor = new TalonFX(12);
     private final TalonFX right_arm_motor = new TalonFX(11);
@@ -55,6 +60,16 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         config.Slot0.kS = 0.20933;
         config.Slot0.kV = 0.10312;
         config.Slot0.kA = 0.00085311;
+
+        //Limit Switch
+        config.HardwareLimitSwitch.ForwardLimitEnable = true;
+        config.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable=true;
+        config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
+        config.HardwareLimitSwitch.ForwardLimitType = ForwardLimitTypeValue.NormallyOpen;
+
+        config.HardwareLimitSwitch.ReverseLimitEnable = false;
+        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 60.0; //TOD: CHANGE THIS TO CORRECT VALUE
 
         config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         config.Slot0.kG = 0.15387;
@@ -143,6 +158,14 @@ public class AdvancedArmSubsystem extends SubsystemBase {
 
     public void setControl(PositionVoltage control) {
         left_arm_motor.setControl(control);
+    }
+
+    public boolean forwardLimitSwitched() {
+       return left_arm_motor.getForwardLimit().getValue().value == ForwardLimitValue.ClosedToGround.value;
+    }
+
+    public boolean reverseLimitSwitched() {
+        return left_arm_motor.getReverseLimit().getValue().value == ReverseLimitValue.ClosedToGround.value;
     }
 
     public double getPosition() {
