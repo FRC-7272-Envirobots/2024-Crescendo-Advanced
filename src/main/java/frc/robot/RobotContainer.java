@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
@@ -80,6 +81,8 @@ public class RobotContainer {
          * The container for the robot. Contains subsystems, OI devices, and commands.
          */
         public RobotContainer() {
+
+                SmartDashboard.putBoolean("AutoDrive", false);
                 // Configure the button bindings
                 configureButtonBindings();
 
@@ -125,23 +128,11 @@ public class RobotContainer {
 
                 // Y button = Run Shooter for amp
                 new JoystickButton(m_driverController, XboxController.Button.kY.value)
-                                .whileTrue(routines.shootRoutine(.1));
+                                .whileTrue(routines.shootRoutine(.2));
 
-<<<<<<< HEAD
-
-                new JoystickButton(m_driverController, XboxController.Button.kB.value)
-                                .whileTrue(m_intake.runOuttake());
                 // B button = Arm in BRAKE mode - this is the default
                 // ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
                 //                 m_robotDrive, () -> m_robotDrive.getPose());
-
-                // new JoystickButton(m_driverController, XboxController.Button.kB.value)
-                //                 .whileTrue(chaseTagCommand);
-=======
-                // B button = Arm in BRAKE mode - this is the default
-                // ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
-                //                 m_robotDrive, () -> m_robotDrive.getPose());
->>>>>>> 014f7a1bacbaa74f06e2fadb4d353eae2fd9088c
 
                 // new JoystickButton(m_driverController, XboxController.Button.kB.value)
                 //                 .whileTrue(chaseTagCommand);
@@ -219,7 +210,7 @@ public class RobotContainer {
 
                 // Shooting angle
                 // Tap (X) = Button 3
-                new JoystickButton(m_arcadeBox, 3)
+                new JoystickButton(m_arcadeBox, 1)
                                 .onTrue(new ArmToPosition(m_arm,  Constants.ArmConstants.speakerPosition, true));
                 // Hold (A) = Button 1
                 // new JoystickButton(m_arcadeBox, 1)
@@ -231,7 +222,7 @@ public class RobotContainer {
                 new JoystickButton(m_arcadeBox, 4)
                                 .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
                 // // Hold (B) = Button 2
-                new JoystickButton(m_arcadeBox, 2)
+                new JoystickButton(m_arcadeBox, 3)
                                 .whileTrue(routines.resetHeading());
 
                 // Tap (R1/RB) = Button 6
@@ -288,8 +279,8 @@ public class RobotContainer {
                                                 m_robotDrive::setModuleStates,
                                                 m_robotDrive).andThen(() -> m_robotDrive.drive(0, 0, 0, false, false)));
 
-                routine.addOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines));
-                routine.setDefaultOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines));
+                routine.addOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines, m_robotDrive));
+                routine.setDefaultOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines, m_robotDrive));
                 return routine.getSelected();
         }
 }

@@ -17,7 +17,7 @@ public class ArmToPosition extends Command {
   private boolean continuous;
 
   // class member variable
-  final MotionMagicVoltage m_position = new MotionMagicVoltage(0); // new PositionVoltage(0);
+  final PositionVoltage m_position =  new PositionVoltage(0);
   // final MotionMagicVoltage m_magic = new MotionMagicVoltage(0;)
   // final trapa
 

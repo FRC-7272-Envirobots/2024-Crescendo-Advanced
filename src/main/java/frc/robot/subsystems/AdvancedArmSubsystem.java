@@ -58,7 +58,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
 
         // Arm motion logic
         config = new TalonFXConfiguration();
-        config.Slot0.kP = 1; // value from SysID tuning: 7.3697 but its too fast and scary;
+        config.Slot0.kP = .5; // value from SysID tuning: 7.3697 but its too fast and scary;
         // "Nobody uses I" apparently
         // config.Slot0.kI = ;
         config.Slot0.kD = 0.056523;
