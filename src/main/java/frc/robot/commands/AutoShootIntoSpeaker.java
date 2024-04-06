@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import java.awt.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -21,6 +20,7 @@ import frc.robot.subsystems.AdvancedArmSubsystem;
 import frc.robot.subsystems.AdvancedShooterSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -37,30 +37,29 @@ public class AutoShootIntoSpeaker extends SequentialCommandGroup {
 
     ArrayList<Command> cmds = new ArrayList<Command>();
 
+    
     cmds.add(new ResetArmPosition(arm));
     cmds.add(new WaitCommand(1));
     cmds.add(new ArmToPosition(arm, Constants.ArmConstants.speakerPosition + 9, false));
     cmds.add(new WaitCommand(.5));
+    // new SequentialCommandGroup(
+    // new WaitUntilCommand(armAtSpeakerPosition),
     cmds.add(routines.shootRoutine(.6).withTimeout(2));
 
-    //if (SmartDashboard.getBoolean("AutoDrive", true)) {
+    // );
+
+    if (SmartDashboard.getBoolean("AutoDrive", true)) {
       System.out.print("auto started");
       cmds.add(new WaitCommand(1));
       cmds.add(new StartEndCommand(() -> {
-        drive.drive(.4, 0, 0, true, false);
-      }, () -> {
-      }, drive));
-      cmds.add(new WaitCommand(2));
-      cmds.add(new StartEndCommand(() -> {
-        drive.drive(0, 0, 0, true, false);
-      }, () -> {
-      }, drive));
-
-    //}
-
+            drive.drive(.4, 0, 0, true, false);
+          }, () -> {
+            drive.drive(0, 0, 0, true, false);
+          }, drive).withTimeout(2));
+    }
+    
     Command[] cmdsarr = new Command[cmds.size()];
     cmds.toArray(cmdsarr);
     addCommands(cmdsarr);
-
   }
 }

@@ -82,7 +82,7 @@ public class RobotContainer {
          */
         public RobotContainer() {
 
-                SmartDashboard.putBoolean("AutoDrive", false);
+                SmartDashboard.putBoolean("AutoDrive", true);
                 // Configure the button bindings
                 configureButtonBindings();
 

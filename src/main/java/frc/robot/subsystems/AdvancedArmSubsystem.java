@@ -115,7 +115,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         return Commands.startEnd(
                 () -> {
                     System.out.println("moving up");
-                    left_arm_motor.set(move_up_pct_power);
+                    left_arm_motor.setControl(new PositionVoltage(left_arm_motor.getPosition().getValue()+1.0));
                 },
                 () -> {
                     System.out.println("moving stopped");
@@ -127,7 +127,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         return Commands.startEnd(
                 () -> {
                     // if(!endstopTriggered()) {
-                        left_arm_motor.set(move_down_pct_power);
+                        left_arm_motor.setControl(new PositionVoltage(left_arm_motor.getPosition().getValue()-1.0));
                     // } else {
                     //     left_arm_motor.set(hold_position_pct_power);
                     // }
