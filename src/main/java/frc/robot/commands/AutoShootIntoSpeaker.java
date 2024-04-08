@@ -48,15 +48,16 @@ public class AutoShootIntoSpeaker extends SequentialCommandGroup {
 
     // );
 
-    if (SmartDashboard.getBoolean("AutoDrive", true)) {
-      System.out.print("auto started");
-      cmds.add(new WaitCommand(1));
-      cmds.add(new StartEndCommand(() -> {
-            drive.drive(.4, 0, 0, true, false);
-          }, () -> {
-            drive.drive(0, 0, 0, true, false);
-          }, drive).withTimeout(2));
-    }
+      // IF YOU WANT TO DRIVE BACK IN AUTO CHANGE THIS SO ITS NOT COMMENTED
+      // IT WAITS 1 SECONDS THEN DRIVES AT 40% SPEED FOR 1.4 SECONDS, THEN STOPS.
+      // IF WE ARE POSITIONED NOT ON THE FRONT OF THE SPEAKER, WE SHOULD INCREASE TO 2 SECONDS TO MAKE SURE WE DRIVE FAR ENOUGH
+      // System.out.print("auto started");
+      // cmds.add(new WaitCommand(1));
+      // cmds.add(new StartEndCommand(() -> {
+      //       drive.drive(.4, 0, 0, true, false);
+      //     }, () -> {
+      //       drive.drive(0, 0, 0, true, false);
+      //     }, drive).withTimeout(1.4));
     
     Command[] cmdsarr = new Command[cmds.size()];
     cmds.toArray(cmdsarr);

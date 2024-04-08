@@ -69,7 +69,8 @@ public class RobotContainer {
         private final AdvancedIntakeSubsystem m_intake = new AdvancedIntakeSubsystem();
         private final AdvancedArmSubsystem m_arm = new AdvancedArmSubsystem();
         private final Lightstrip lightstrip = new Lightstrip();
-        private final Routines routines = new Routines(m_arm, m_shooter, m_intake, lightstrip, m_lightSensor, m_robotDrive);
+        private final Routines routines = new Routines(m_arm, m_shooter, m_intake, lightstrip, m_lightSensor,
+                        m_robotDrive);
         // private final CameraOverlay cameraOverlay = new CameraOverlay();
 
         // The driver's controller
@@ -91,8 +92,11 @@ public class RobotContainer {
                 // Set up camera server
                 UsbCamera frontCamera = CameraServer.startAutomaticCapture("front", 0);
                 frontCamera.setResolution(640, 480);
+                frontCamera.setFPS(30);
+                
                 UsbCamera rearCamera = CameraServer.startAutomaticCapture("rear", 1);
                 rearCamera.setResolution(640, 480);
+                frontCamera.setFPS(30);
 
                 // Configure default commands
                 m_robotDrive.setDefaultCommand(
@@ -101,11 +105,11 @@ public class RobotContainer {
                                 new RunCommand(
                                                 () -> m_robotDrive.drive(
                                                                 -MathUtil.applyDeadband(m_driverController.getLeftY(),
-                                                                OIConstants.kDriveDeadband),
+                                                                                OIConstants.kDriveDeadband),
                                                                 -MathUtil.applyDeadband(m_driverController.getLeftX(),
-                                                                OIConstants.kDriveDeadband),
+                                                                                OIConstants.kDriveDeadband),
                                                                 -MathUtil.applyDeadband(m_driverController.getRightX(),
-                                                                OIConstants.kDriveDeadband),
+                                                                                OIConstants.kDriveDeadband),
                                                                 true, false),
                                                 m_robotDrive));
         }
@@ -132,12 +136,12 @@ public class RobotContainer {
 
                 // B button = Arm in BRAKE mode - this is the default
                 // ChaseTagCommand chaseTagCommand = new ChaseTagCommand(photonCamera,
-                //                 m_robotDrive, () -> m_robotDrive.getPose());
+                // m_robotDrive, () -> m_robotDrive.getPose());
 
                 // new JoystickButton(m_driverController, XboxController.Button.kB.value)
-                //                 .whileTrue(chaseTagCommand);
+                // .whileTrue(chaseTagCommand);
                 // new JoystickButton(m_driverController, XboxController.Button.kB.value)
-                //                 .whileTrue(chaseTagCommand);
+                // .whileTrue(chaseTagCommand);
                 // R1 / RB button - Arm moves up
                 new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
                                 .whileTrue(m_arm.moveArmUpCommand());
@@ -146,8 +150,8 @@ public class RobotContainer {
                 new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
                                 .whileTrue(m_arm.moveArmDownCommand());
 
-                new JoystickButton(m_arcadeBox, 1)
-                                .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+                // new JoystickButton(m_arcadeBox, 1)
+                //                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
 
                 // // right
                 // new POVButton(m_driverController,
@@ -185,20 +189,18 @@ public class RobotContainer {
                 EventLoop m_loop = new EventLoop();
 
                 // System Identification Routines
-                new JoystickButton(m_sysIDJoystick, 7)
-                                .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+                // new JoystickButton(m_sysIDJoystick, 7)
+                //                 .whileTrue(m_arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
-                new JoystickButton(m_sysIDJoystick, 8)
-                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kForward));
+                // new JoystickButton(m_sysIDJoystick, 8)
+                //                 .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kForward));
 
-                // If only the button worked.
-                new JoystickButton(m_sysIDJoystick, 9)
-                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+                // // If only the button worked.
+                // new JoystickButton(m_sysIDJoystick, 9)
+                //                 .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-                new JoystickButton(m_sysIDJoystick, 10)
-                                .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-
+                // new JoystickButton(m_sysIDJoystick, 10)
+                //                 .whileTrue(m_arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
                 // Intake angle
                 // Tap (L1/LB) = Button 5
@@ -206,15 +208,17 @@ public class RobotContainer {
                                 .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.intakePosition, true));
                 // Hold (L2/LT) = Axis 2
                 // m_arcadeBox.axisGreaterThan(2, 0.5, m_loop)
-                //                 .ifHigh(() -> new ArmToPosition(m_arm,  Constants.ArmConstants.intakePosition, true));
+                // .ifHigh(() -> new ArmToPosition(m_arm, Constants.ArmConstants.intakePosition,
+                // true));
 
                 // Shooting angle
                 // Tap (X) = Button 3
-                new JoystickButton(m_arcadeBox, 1)
-                                .onTrue(new ArmToPosition(m_arm,  Constants.ArmConstants.speakerPosition, true));
+                new JoystickButton(m_arcadeBox, 3)
+                                .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.speakerPosition, true));
                 // Hold (A) = Button 1
                 // new JoystickButton(m_arcadeBox, 1)
-                //                 .whileTrue(new ArmToPosition(m_arm, Constants.ArmConstants.speakerPosition, true));
+                // .whileTrue(new ArmToPosition(m_arm, Constants.ArmConstants.speakerPosition,
+                // true));
 
                 // // Resting angle
                 // double restingPosition = 0.0;
@@ -222,7 +226,7 @@ public class RobotContainer {
                 new JoystickButton(m_arcadeBox, 4)
                                 .onTrue(new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
                 // // Hold (B) = Button 2
-                new JoystickButton(m_arcadeBox, 3)
+                new JoystickButton(m_arcadeBox, 2)
                                 .whileTrue(routines.resetHeading());
 
                 // Tap (R1/RB) = Button 6
@@ -231,7 +235,8 @@ public class RobotContainer {
 
                 // // Hold (R2/RT) = Axis 3
                 // m_arcadeBox.axisGreaterThan(3, 0.5, m_loop)
-                //                 .ifHigh(() -> new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition, true));
+                // .ifHigh(() -> new ArmToPosition(m_arm, Constants.ArmConstants.ampPosition,
+                // true));
         }
 
         /**
@@ -279,8 +284,10 @@ public class RobotContainer {
                                                 m_robotDrive::setModuleStates,
                                                 m_robotDrive).andThen(() -> m_robotDrive.drive(0, 0, 0, false, false)));
 
-                routine.addOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines, m_robotDrive));
-                routine.setDefaultOption("AutoShootOneNote", new AutoShootIntoSpeaker(m_arm, m_shooter, routines, m_robotDrive));
+                routine.addOption("AutoShootOneNote",
+                                new AutoShootIntoSpeaker(m_arm, m_shooter, routines, m_robotDrive));
+                routine.setDefaultOption("AutoShootOneNote",
+                                new AutoShootIntoSpeaker(m_arm, m_shooter, routines, m_robotDrive));
                 return routine.getSelected();
         }
 }

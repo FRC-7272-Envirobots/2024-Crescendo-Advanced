@@ -33,13 +33,13 @@ public class ArmToPosition extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    System.out.println("init position");
+    //System.out.println("init position");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    System.out.println("exec");
+    //System.out.println("exec");
     m_position.Slot = 0;
     m_position.Position = position;
     //m_position.Velocity = 35;
@@ -53,7 +53,7 @@ public class ArmToPosition extends Command {
   @Override
   public void end(boolean interrupted) {
     arm.moveArm(AdvancedArmSubsystem.hold_position_pct_power);
-    System.out.println("end");
+    //System.out.println("end");
   }
 
   // Returns true when the command should end.

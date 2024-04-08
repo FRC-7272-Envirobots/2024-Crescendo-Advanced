@@ -47,7 +47,6 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     DigitalInput limitSwitch1;
     DigitalInput limitSwitch2;
 
-
     public AdvancedArmSubsystem() {
         super();
         this.speakerPosition = SmartDashboard.getNumber("speakerPosition", Constants.ArmConstants.speakerPosition);
@@ -66,15 +65,19 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         config.Slot0.kV = 0.10312;
         config.Slot0.kA = 0.00085311;
 
-        //Limit Switch
+        // Limit Switch
         config.HardwareLimitSwitch.ReverseLimitEnable = true;
-        config.HardwareLimitSwitch.ReverseLimitAutosetPositionEnable=true;
+        config.HardwareLimitSwitch.ReverseLimitAutosetPositionEnable = true;
         config.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.LimitSwitchPin;
         config.HardwareLimitSwitch.ReverseLimitType = ReverseLimitTypeValue.NormallyOpen;
+        //config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        //config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
 
-        config.HardwareLimitSwitch.ForwardLimitEnable = false;
+        config.HardwareLimitSwitch.ForwardLimitEnable = true;
+        config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
+        config.HardwareLimitSwitch.ForwardLimitType = ForwardLimitTypeValue.NormallyOpen;
         config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 82.0; //TOD: CHANGE THIS TO CORRECT VALUE
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 82.0;
 
         config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         config.Slot0.kG = 0.15387;
@@ -89,7 +92,8 @@ public class AdvancedArmSubsystem extends SubsystemBase {
             System.out.println("Could not configure device. Error: " + status.toString());
         }
         // reset relative position of motor to zero.
-        // Robot MUST be in start position when robot is turned on, or press the reset button on roborio.
+        // Robot MUST be in start position when robot is turned on, or press the reset
+        // button on roborio.
         left_arm_motor.setPosition(0);
         left_arm_motor.setNeutralMode(NeutralModeValue.Brake);
 
@@ -97,7 +101,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         right_arm_motor.setNeutralMode(NeutralModeValue.Brake);
         right_arm_motor.setControl(right_arm_follower);
 
-        //armEncoder = new DutyCycleEncoder(8);
+        // armEncoder = new DutyCycleEncoder(8);
 
         /* Speed up signals for better charaterization data */
         BaseStatusSignal.setUpdateFrequencyForAll(250,
@@ -114,8 +118,11 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public Command moveArmUpCommand() {
         return Commands.startEnd(
                 () -> {
-                    System.out.println("moving up");
-                    left_arm_motor.setControl(new PositionVoltage(left_arm_motor.getPosition().getValue()+1.0));
+                    // System.out.println("moving up");
+                    // left_arm_motor
+                    //         .setControl(new PositionVoltage(left_arm_motor.getPosition().getValueAsDouble() + .01));
+                    // System.out.print(left_arm_motor.getPosition());
+                    left_arm_motor.set(move_up_pct_power);
                 },
                 () -> {
                     System.out.println("moving stopped");
@@ -126,10 +133,16 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     public Command moveArmDownCommand() {
         return Commands.startEnd(
                 () -> {
-                    // if(!endstopTriggered()) {
-                        left_arm_motor.setControl(new PositionVoltage(left_arm_motor.getPosition().getValue()-1.0));
+                    // System.out.print(left_arm_motor.getPosition().getValueAsDouble());
+                    // // if(!endstopTriggered()) {
+                    // left_arm_motor
+                    //         .setControl(new PositionVoltage(left_arm_motor.getPosition().getValueAsDouble() - .01));
+                    // System.out.print(left_arm_motor.getPosition());
+
+                        left_arm_motor.set(move_down_pct_power);
+
                     // } else {
-                    //     left_arm_motor.set(hold_position_pct_power);
+                    // left_arm_motor.set(hold_position_pct_power);
                     // }
                 },
                 () -> {
@@ -150,15 +163,15 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     }
 
     // public boolean endstopTriggered() {
-    //     return limitSwitch1.get() || limitSwitch2.get();
+    // return limitSwitch1.get() || limitSwitch2.get();
     // }
 
     // public double getEncoderReading() {
-    //     return armEncoder.getPositionOffset();
+    // return armEncoder.getPositionOffset();
     // }
 
     // public void resetEncoder() {
-    //     armEncoder.reset();
+    // armEncoder.reset();
     // }
 
     public void moveArm(double pct_power) {
@@ -170,7 +183,7 @@ public class AdvancedArmSubsystem extends SubsystemBase {
     }
 
     public boolean forwardLimitSwitched() {
-       return left_arm_motor.getForwardLimit().getValue().value == ForwardLimitValue.ClosedToGround.value;
+        return left_arm_motor.getForwardLimit().getValue().value == ForwardLimitValue.ClosedToGround.value;
     }
 
     public boolean reverseLimitSwitched() {
@@ -185,45 +198,43 @@ public class AdvancedArmSubsystem extends SubsystemBase {
         return left_arm_motor.getVelocity().getValueAsDouble();
     }
 
+    // private final VoltageOut m_sysidControl = new VoltageOut(0);
+    // private SysIdRoutine m_SysIdRoutine = new SysIdRoutine(
+    //         new SysIdRoutine.Config(
+    //                 null, // Default ramp rate is acceptable
+    //                 Volts.of(4), // Reduce dynamic voltage to 4 to prevent motor brownout
+    //                 null, // Default timeout is acceptable
+    //                       // Log state with Phoenix SignalLogger class
+    //                 (state) -> SignalLogger.writeString("state", state.toString())),
+    //         new SysIdRoutine.Mechanism(
+    //                 (Measure<Voltage> volts) -> left_arm_motor.setControl(m_sysidControl.withOutput(volts.in(Volts))),
+    //                 null,
+    //                 this));
 
-    
-    private final VoltageOut m_sysidControl = new VoltageOut(0);
-    private SysIdRoutine m_SysIdRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null, // Default ramp rate is acceptable
-                    Volts.of(4), // Reduce dynamic voltage to 4 to prevent motor brownout
-                    null, // Default timeout is acceptable
-                          // Log state with Phoenix SignalLogger class
-                    (state) -> SignalLogger.writeString("state", state.toString())),
-            new SysIdRoutine.Mechanism(
-                    (Measure<Voltage> volts) -> left_arm_motor.setControl(m_sysidControl.withOutput(volts.in(Volts))),
-                    null,
-                    this));
+    // /**
+    //  * Returns a command that will execute a quasistatic test in the given
+    //  * direction.
+    //  *
+    //  * @param direction The direction (forward or reverse) to run the test in
+    //  */
+    // public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    //     SignalLogger.start();
 
-    /**
-     * Returns a command that will execute a quasistatic test in the given
-     * direction.
-     *
-     * @param direction The direction (forward or reverse) to run the test in
-     */
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-                SignalLogger.start();
+    //     return m_SysIdRoutine.quasistatic(direction);
+    //     // SignalLogger.stop();
+    // }
 
-        return m_SysIdRoutine.quasistatic(direction);
-        // SignalLogger.stop();
-    }
+    // /**
+    //  * Returns a command that will execute a dynamic test in the given direction.
+    //  *
+    //  * @param direction The direction (forward or reverse) to run the test in
+    //  */
+    // public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    //     SignalLogger.start();
 
-    /**
-     * Returns a command that will execute a dynamic test in the given direction.
-     *
-     * @param direction The direction (forward or reverse) to run the test in
-     */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-                SignalLogger.start();
-
-        return m_SysIdRoutine.dynamic(direction);
-        // SignalLogger.stop();
-    }
+    //     return m_SysIdRoutine.dynamic(direction);
+    //     // SignalLogger.stop();
+    //}
 
     public void resetPosition() {
         left_arm_motor.setPosition(0);
